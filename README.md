@@ -1,6 +1,6 @@
 # easycallcenter365
 
-![easycallcenter365](https://gitee.com/easycallcenter365/easycallcenter365/raw/master/logo.jpg) 
+![easycallcenter365](logo.jpg) 
 
 基于FreeSWITCH和大模型的智能语音客服
 
@@ -75,7 +75,7 @@
 
   转人工坐席的流程是，先自动排队，然后转接给空闲坐席处理，坐席需要通过电话工具条登录。  
   
-  ![电话工具条](https://gitee.com/easycallcenter365/easycallcenter365/raw/master/docs/images/phone-bar.png) 
+  ![电话工具条](docs/images/phone-bar.png) 
   
   坐席接听测试方法：请用记事本打开 docs\phone-bar.html 文件，
   修改 scriptServer 的地址为 easycallcenter365 所在服务器的IP地址，保存后重新使用浏览器打开 phone-bar.html 文件。
