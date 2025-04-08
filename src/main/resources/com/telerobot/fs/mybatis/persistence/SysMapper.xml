@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.telerobot.fs.mybatis.persistence.SysMapper">
+
+	<select id="getParamsList" resultType="com.telerobot.fs.entity.po.SysParams">
+		select id, param_name paramName, param_code paramCode, param_value paramValue
+		 from cc_params
+		order by id desc
+	</select>
+
+	<select id="getKbContentByCat" resultType="com.telerobot.fs.entity.dao.LlmKb">
+		select id, cat, content
+		 from cc_llm_kb
+		where cat=#{cat}
+	</select>
+
+
+	<insert id="addOnlineUser" useGeneratedKeys="false" keyProperty="id"
+			parameterType="com.telerobot.fs.entity.po.AgentEntity">
+		insert into
+		 cc_agent_online(
+		    id,
+		    extnum,
+			opnum,
+			group_id,
+			session_id,
+			agent_status,
+			last_hangup_time,
+			login_time,
+			client_ip,
+			busy_lock_time,
+			skill_level
+		 )
+		value
+		(
+		#{user.id},
+		#{user.extnum},
+		#{user.opnum},
+		#{user.groupId},
+		#{user.sessionId},
+		#{user.agentStatus.index},
+		0,
+		#{user.loginTime},
+		#{user.clientIp},
+		0,
+		#{user.skillLevel}
+		)
+	</insert>
+
+	<update id="setAgentStatus">
+		update cc_agent_online
+		   set agent_status=#{status}
+		where opnum=#{opnum}
+	</update>
+
+	<delete id="removeOnlineUser">
+		delete from cc_agent_online where  opnum in
+		<foreach collection="optList" item="item" open="(" close=")" separator="," index="index">
+			#{item}
+		</foreach>
+	</delete>
+
+    <delete id="removeAllOnlineuser">
+         truncate table cc_agent_online
+    </delete>
+
+
+	<select id="getFreeUserList" resultType="com.telerobot.fs.wshandle.SessionEntity">
+		select  id, extnum, opnum,
+		group_id groupId,
+		session_id  sessionId,
+		agent_status agentStatus,
+		last_hangup_time lastHangupTime,
+		login_time loginTime,
+		client_ip clientIp,
+		skill_level skillLevel
+		 from cc_agent_online where 1=1
+			<if test="groupId != null and groupId != 0">
+				and  group_id=#{groupId}
+			</if>
+		 and agent_status=1  and  group_id > 0
+		order by lastHangupTime asc
+	</select>
+
+	<select id="getPowerByExtNum" resultType="com.telerobot.fs.entity.dao.ExtPowerConfig">
+		SELECT
+		 power_id powerId ,
+		 ext_num extNum,
+		 group_id groupId
+		   from
+		 cc_ext_power
+		where ext_num=#{extNum}
+	</select>
+
+	<resultMap id="AgentExResultMap" type="com.telerobot.fs.entity.dto.AgentEx">
+		<id column="id" property="id" />
+		<result column="extnum" property="extnum" />
+		<result column="opnum" property="opnum" />
+		<result column="group_id" property="groupId" />
+		<result column="session_id" property="sessionId" />
+		<result column="agent_status" property="agentStatus" />
+		<result column="last_hangup_time" property="lastHangupTime" />
+		<result column="login_time" property="loginTime" />
+		<result column="client_ip" property="clientIp" />
+		<result column="busy_lock_time" property="busyLockTime" />
+		<result column="skill_level" property="skillLevel" />
+	</resultMap>
+
+	<select id="getAllUserList" resultMap="AgentExResultMap" resultType="com.telerobot.fs.entity.dto.AgentEx">
+		 SELECT
+            id, extnum, opnum, group_id, session_id, agent_status,
+            last_hangup_time, login_time, client_ip, busy_lock_time, skill_level
+        FROM
+            cc_agent_online where group_id > 0
+	</select>
+
+	<select id="getAllGroupList"  resultType="com.telerobot.fs.entity.dao.BizGroup">
+		 SELECT
+            group_id  groupId,
+            biz_group_name  bizGroupName
+        FROM
+            cc_biz_group
+	</select>
+
+	<select id="getAgentTalkStartTime" resultType="com.telerobot.fs.wshandle.SessionEntity">
+		select  id, extnum, opnum,
+		group_id groupId,
+		session_id  sessionId,
+		agent_status agentStatus,
+		last_hangup_time lastHangupTime,
+		login_time loginTime,
+		client_ip clientIp,
+		skill_level skillLevel,
+		state_change_time stateChangeTime
+		 from cc_agent_online where group_id=#{groupId} and agent_status in (3, 4)
+		order by lastHangupTime asc
+	</select>
+
+
+	<select id="getCallConnectedRateByBatchId" resultType="java.lang.Double">
+		SELECT (SELECT COUNT(*) as connected from batchcall_phone  where batch_id=#{batchId}  and connected_time > 0 and  call_end_time>0 )
+		 / (SELECT COUNT(*) as total from batchcall_phone  where batch_id=#{batchId} and callout_time>0  and  call_end_time>0 ) as connected_rate
+	</select>
+
+	<select id="getCallDropRateByBatchId" resultType="java.lang.Double">
+		SELECT
+	(select count(*) from batchcall_phone where batch_id=#{batchId}  and  connected_time>0 and callstatus=51)
+	/
+	(select count(*) from batchcall_phone where batch_id=#{batchId}  and connected_time>0 and  call_end_time>0 )
+	as
+	  dropRate
+	</select>
+
+	<select id="getAvgRingTimeLenByBatchId" resultType="java.lang.Double">
+		 select avg(connected_time - callout_time)/1000 from batchcall_phone where batch_id=#{batchId}
+         and  connected_time>0
+	</select>
+
+	<select id="getAvgPlayTimeLenByBatchId" resultType="java.lang.Double">
+		select  avg(queue_time - connected_time)/1000  from batchcall_phone where batch_id=#{batchId}
+	    and  queue_time>0  and  connected_time>0
+	</select>
+
+	<select id="getAvgTalkTimeLenByopnum" resultType="java.lang.Double">
+		select avg(call_end_time - answered_time)/1000  from batchcall_phone where batch_id=#{batchId}
+	    and  call_end_time>0  and  answered_time>0
+	</select>
+
+
+	<update id="setAgentStatusWithBusyLock">
+		update  cc_agent_online
+		   set agent_status=#{status}, busy_lock_time=#{busyLockTime}
+		where opnum=#{opnum}
+	</update>
+
+	<update id="resetAgentBusyLockTime">
+		update  cc_agent_online
+		   set   busy_lock_time = 0
+		where opnum=#{opnum}
+	</update>
+
+	<update id="saveHangupTime">
+		update  cc_agent_online
+		   set  last_hangup_time = #{currentTime}
+		where extnum=#{extNum}
+	</update>
+
+	<update id="resetAgentBusyLockTimeout">
+		<![CDATA[
+		update  cc_agent_online
+		   set agent_status=1, busy_lock_time = 0
+		where busy_lock_time > 0 and opnum=#{opnum}  and busy_lock_time <=  #{expiredTimeMills}
+		]]>
+	</update>
+
+	<select id="selectAgentBusyLockTimeout" resultType="com.telerobot.fs.wshandle.SessionEntity" >
+		<![CDATA[
+	  select  id, extnum, opnum,
+		group_id groupId,
+		session_id  sessionId,
+		agent_status agentStatus,
+		last_hangup_time lastHangupTime,
+		login_time loginTime,
+		client_ip clientIp,
+		skill_level skillLevel
+		  from cc_agent_online
+		  where
+	    busy_lock_time > 0  and busy_lock_time  <=  #{expiredTimeMills}
+	    ]]>
+	</select>
+
+</mapper>

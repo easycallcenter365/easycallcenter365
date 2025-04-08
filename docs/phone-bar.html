@@ -1,0 +1,521 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<title>呼叫中心html客户端工具条</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="page.css" />
+    <script type="text/javascript" src="jquery-1.11.0.js"></script>
+    <script type="text/javascript" src="ccPhoneBarSocket.js"></script>
+	  
+    <script type="text/javascript">
+        var _phoneBar = new ccPhoneBarSocket();
+        var scriptServer = "192.168.14.218";
+        var  extnum = '1018'; //分机号
+        var opnum = '8001'; //工号
+        var skillLevel = 9; //技能等级
+        var groupId = 1; // 业务组id
+        if(window.location.href.toString().indexOf("?") != -1){
+            console.log( ccPhoneBarSocket.utils );
+            extnum = ccPhoneBarSocket.utils.getQueryParam("extNum");
+            opnum = ccPhoneBarSocket.utils.getQueryParam("opNum");
+            groupId = ccPhoneBarSocket.utils.getQueryParam("groupId");
+            console.log("extNum=", extnum, "opNum=", opnum);
+        }
+
+        function resetExtNumAndOpNum(ext, op, groupId) {
+            window.location.href = "?extNum=" + ext + "&opNum=" + op + "&groupId=" + groupId;
+        };
+
+		(function loadLoginToken(){
+
+            // 目前已经把 projectId 和 groupId合并为同一个参数;
+            var getTokenUrl = "http://"+ scriptServer +":8880/call-center/create-token";
+            var destUrl = getTokenUrl + "?extnum=" + extnum + "&opnum=" + opnum
+            + "&groupId=" + groupId +"&skillLevel=" + skillLevel
+            ;
+
+            var script = document.createElement("script");
+            script.type = "text/javascript";
+            script.src = destUrl;
+            document.getElementsByTagName('head')[0].appendChild(script);
+		})();
+
+        (function loadExtPassword(){
+            var  extPassword = '1234567';
+            var url = "http://"+ scriptServer +":8880/call-center/create-ext-password?pass=" + extPassword;
+            var script = document.createElement("script");
+            script.type = "text/javascript";
+            script.src = url;
+            document.getElementsByTagName('head')[0].appendChild(script);
+        })();
+
+        (function loadGatewayList(){
+            var url = "http://"+ scriptServer +":8880/call-center/create-gateway-list" ;
+            var script = document.createElement("script");
+            script.type = "text/javascript";
+            script.src = url;
+            document.getElementsByTagName('head')[0].appendChild(script);
+        })();
+
+        // 将视频级别填充到下拉列表中的函数
+        function populateVideoLevelDropdown(objId) {
+            let select = document.getElementById(objId);
+            if(select == null) return;
+            // 遍历视频级别数据
+            for (let key in ccPhoneBarSocket.videoLevels) {
+                if (ccPhoneBarSocket.videoLevels.hasOwnProperty(key)) {
+                    let level = ccPhoneBarSocket.videoLevels[key];
+                    let option = document.createElement('option');
+                    option.value = level.levelId; // 设置值为 levelId
+                    option.text = level.description; // 显示文本
+                    select.appendChild(option);
+                }
+            }
+            select.value = ccPhoneBarSocket.videoLevels.HD.levelId ;
+        }
+
+	</script>
+
+<script> 
+var _callConfig = null;
+
+window.onload = function(){
+
+    // 调用函数填充视频清晰度的下拉列表
+    populateVideoLevelDropdown('videoLevelSelect');
+    populateVideoLevelDropdown('member_video_level');
+
+	//工具条对象断开事件
+	// _phoneBar.on(ccPhoneBarSocket.eventList.ws_disconnected, function(msg){
+	// 	console.log(msg);
+	// });
+    //
+    // //工具条对象连接成功
+    // _phoneBar.on(ccPhoneBarSocket.eventList.ws_connected, function(msg){
+    //     console.log(msg);
+    // });
+    //
+	// _phoneBar.on(ccPhoneBarSocket.eventList.callee_ringing, function(msg){
+	// 	console.log(msg.content, "被叫振铃事件");
+	// });
+	// _phoneBar.on(ccPhoneBarSocket.eventList.caller_answered, function(msg){
+	// 	console.log(msg, "主叫接通" );
+	// });
+    // _phoneBar.on(ccPhoneBarSocket.eventList.caller_hangup, function(msg){
+    //     console.log(msg, "主叫挂断");
+    // });
+    //
+	// _phoneBar.on(ccPhoneBarSocket.eventList.callee_answered, function(msg){
+	// 	console.log(msg, "被叫接通");
+	// });
+	// _phoneBar.on(ccPhoneBarSocket.eventList.callee_hangup, function(msg){
+	// 	console.log(msg, "被叫挂断");
+	// });
+    //
+	// _phoneBar.on(ccPhoneBarSocket.eventList.status_changed, function(msg){
+	// 	console.log("座席状态改变: " ,msg);
+	// });
+    //
+    // // 一次外呼结束;
+    // _phoneBar.on(ccPhoneBarSocket.eventList.outbound_finished, function(msg){
+    // 	console.log('一次外呼结束', msg);
+    // });
+
+    // websocket通信对象断开事件;
+    _phoneBar.on(ccPhoneBarSocket.eventListWithTextInfo.ws_disconnected.code, function(msg){
+        console.log(msg);
+        _phoneBar.updatePhoneBar(msg, ccPhoneBarSocket.eventListWithTextInfo.ws_disconnected.code);
+        $("#transfer_area").hide();
+    });
+
+    _phoneBar.on(ccPhoneBarSocket.eventListWithTextInfo.request_args_error.code, function(msg){
+        console.log(msg);
+        _phoneBar.updatePhoneBar(msg, ccPhoneBarSocket.eventListWithTextInfo.request_args_error.code);
+    });
+
+    //用户已在其他设备登录
+    _phoneBar.on(ccPhoneBarSocket.eventListWithTextInfo.user_login_on_other_device.code, function(msg){
+        _phoneBar.updatePhoneBar(msg, ccPhoneBarSocket.eventListWithTextInfo.user_login_on_other_device.code);
+        alert(ccPhoneBarSocket.eventListWithTextInfo.user_login_on_other_device.msg);
+    });
+
+    //websocket连接成功
+    _phoneBar.on(ccPhoneBarSocket.eventListWithTextInfo.ws_connected.code, function(msg){
+        console.log(msg);
+        _phoneBar.updatePhoneBar(msg, ccPhoneBarSocket.eventListWithTextInfo.ws_connected.code);
+    });
+
+    _phoneBar.on(ccPhoneBarSocket.eventListWithTextInfo.callee_ringing.code, function(msg){
+        console.log(msg.content, "被叫振铃事件");
+        _phoneBar.updatePhoneBar(msg, ccPhoneBarSocket.eventListWithTextInfo.callee_ringing.code);
+    });
+    _phoneBar.on(ccPhoneBarSocket.eventListWithTextInfo.caller_answered.code, function(msg){
+        console.log(msg, "主叫接通" );
+        _phoneBar.updatePhoneBar(msg, ccPhoneBarSocket.eventListWithTextInfo.caller_answered.code);
+    });
+    _phoneBar.on(ccPhoneBarSocket.eventListWithTextInfo.caller_hangup.code, function(msg){
+        console.log(msg, "主叫挂断");
+        $("#reInviteVideoBtn").attr("disabled","disabled");
+        $("#sendVideoFileBtn").attr("disabled","disabled");
+        $("#transfer_area").hide();
+        _phoneBar.updatePhoneBar(msg, ccPhoneBarSocket.eventListWithTextInfo.caller_hangup.code);
+    });
+
+    _phoneBar.on(ccPhoneBarSocket.eventListWithTextInfo.callee_answered.code, function(msg){
+        console.log(msg, "被叫接通");
+        _phoneBar.updatePhoneBar(msg, ccPhoneBarSocket.eventListWithTextInfo.callee_answered.code);
+    });
+    _phoneBar.on(ccPhoneBarSocket.eventListWithTextInfo.callee_hangup.code, function(msg){
+        console.log(msg, "被叫挂断");
+        $("#transfer_area").hide();
+        _phoneBar.updatePhoneBar(msg, ccPhoneBarSocket.eventListWithTextInfo.callee_hangup.code);
+    });
+
+    _phoneBar.on(ccPhoneBarSocket.eventListWithTextInfo.status_changed.code, function(msg){
+        console.log("座席状态改变: " ,msg);
+        _phoneBar.updatePhoneBar(msg, ccPhoneBarSocket.eventListWithTextInfo.status_changed.code);
+    });
+
+    _phoneBar.on(ccPhoneBarSocket.eventList.on_audio_call_connected, function(msg){
+        console.log("音频通话已建立: " ,msg);
+        $("#reInviteVideoBtn").removeAttr("disabled");
+    });
+
+    _phoneBar.on(ccPhoneBarSocket.eventList.on_video_call_connected, function(msg){
+        console.log("视频通话已建立: " ,msg);
+        $("#sendVideoFileBtn").removeAttr("disabled");
+    });
+
+    
+
+    // 订阅的坐席状态列表发生改变
+    _phoneBar.on(ccPhoneBarSocket.eventList.agent_status_data_changed, function (msg) {
+        console.log("agent_status_data_changed.");
+        // 当 transfer_to_groupId 值改变时更新 transfer_to_member
+        $(transferToGroupId).off("change");
+        $(transferToGroupId).on("change", function () {
+            refreshMemberIdList();
+        });
+        refreshMemberIdList();
+    });
+
+    // 电话工具条参数配置;
+	_callConfig = {
+        'useDefaultUi' : true,
+        // loginToken 信息是加密的字符串， 包含以下字段信息：extnum[分机号]、opnum[工号]、groupId[业务组]、skillLevel[技能等级]
+        'loginToken': '',
+
+         // 电话工具条服务器端的地址; 端口默认是1081
+        'ipccServer': scriptServer + ':1081',
+
+        // 网关列表， 默认需要加密后在在通过客户端向呼叫系统传递;
+        // 注意在注册模式下，网关参数更改之后，必须重启语音服务 [docker restart freeswitch] 方可生效，不支持热更新;
+        // 支持多个网关同时使用，按照优先级依次使用, 支持网关负载容错溢出 [第一条网关外呼出错后，自动使用第二条网关重试，直至外呼不出错] ;
+        'gatewayList': [
+            {
+                uuid: '01',   // 网关唯一编号;
+                updateTime: 1892622572983,  //网关信息更新时间, 每次修改必须更新这个字段，否则配置无法生效;
+                gatewayAddr: '10.255.240.4:5030;outbound',  // 网关地址或名称，  如果是注册模式： 网关地址参数则填写为网关名称;
+                callerNumber: '055164901409',                 //主叫号码
+                calleePrefix: '',                    // 被叫前缀
+                priority: 2,                         //优先级，数字越小，越优先被使用;
+                concurrency: 20,                    // 网关并发数，同时支持呼叫数;
+                register: false,                     // 是否为注册模式
+                audioCodec: 'g711'                   // 网关通信语音编码;
+            }  
+        ],
+
+        // 网关列表信息是否为加密模式;
+        'gatewayEncrypted': false
+    };
+
+    // 使用工具条之前需要先初始化 _callConfig 参数， 填充各个字段的值： 合计7个字段，必须填写正确 ；
+	//********************************************************************************************
+    // 以下代码设置加密的参数： loginToken、extPassword、gatewayList；   在本页面的demo演示中需要调用服务器端接口获取密文字符串;
+
+	console.log('loginToken = ',loginToken);
+	if(typeof(loginToken) != "undefined") {
+        _callConfig["loginToken"] = loginToken;
+    } else{
+	    alert("电话工具条：无法获取 loginToken!");
+	    return;
+    }
+
+    console.log('_phoneEncryptPassword = ',_phoneEncryptPassword);
+    if(typeof(_phoneEncryptPassword) != "undefined") {
+        _callConfig["extPassword"] = _phoneEncryptPassword;
+    } else{
+        alert("电话工具条：无法获取 _phoneEncryptPassword!");
+        return;
+    }
+
+    console.log('_configGatewayList = ', _configGatewayList);
+    if(typeof(_configGatewayList) != "undefined" && _callConfig["gatewayEncrypted"]) {
+        //_callConfig["gatewayList"] = _configGatewayList;
+    } else{
+       //  alert("电话工具条：无法获取 _configGatewayList!");
+    }
+
+    _phoneBar.initConfig(_callConfig);
+};
+
+function onConferenceEnd() {
+    document.getElementById("endConference").setAttribute("disabled", "true");
+    document.getElementById("startConference").removeAttribute("disabled");
+    document.getElementById("conference_member_list").style.display = "none";
+    // 启用外呼按钮
+    $("#callBtn").addClass('on');
+    // 启用置闲按钮
+    $("#setFree").addClass('on');
+    // 启用签出按钮
+    $("#onLineBtn").addClass('on');
+    //移除所有的参会成员
+    $(".conf_member_item_row").remove();
+
+    $("#callStatus").text("会议结束.");
+}
+
+function onConferenceStart() {
+    document.getElementById("endConference").removeAttribute("disabled");
+    document.getElementById("conference_member_list").style.display = "block";
+    $("#callStatus").text("视频会议进行中...");
+}
+
+/**
+ *  成功把电话转接到多人视频会议
+ */
+function onTransferToConferenceSuccess(msg) {
+    $("#callStatus").text("成转接到视频会议");
+    $("#setFree").removeClass("on");
+    $("#setBusy").removeClass("on");
+    $("#callBtn").removeClass("on");
+
+    //界面显示成功转接到视频会议电话
+    var phone = msg.object.phone;
+    var name = msg.object.name;
+    _phoneBar.conferenceAddMemberFromExistCall(name, phone);
+}
+
+
+</script>
+
+</head>
+<body>
+
+<form>
+
+<table width="1024">
+<tr>
+  <td width="100%" colspan="2" height="55">
+   <img src="images/logo.jpg" width="200" height="50" /> 
+  </td>
+</tr>
+<tr>
+<td width="70%">
+<div>
+    <div class="head_dial" style="padding-left: 10px; ">
+	     
+        <dl class="dial">
+            <dt>
+                <label for="ccphoneNumber"></label><input type="text" name="ccphoneNumber" id="ccphoneNumber" placeholder="请输入电话号码" class="tel_txt" />
+            </dt>
+            <dd>
+                <ul><li id="callStatus" title="" class="status4">没有连接</li></ul>
+                <span id="showCallLen" style="display:none"><b>00:00</b></span>
+            </dd>
+        </dl>
+
+        <ul class="dial_btn">
+            <li><a href="#" id="setFree" class="xz_btn off"></a><span>置闲</span></li>
+            <li><a href="#" id="setBusy" class="sm_btn off"></a><span>忙碌</span></li>
+            <li><a href="#" id="callBtn" class="wh_btn"></a><span>外呼</span></li>
+            <li><a href="#" id="transferBtn" class="zjie_btn"></a><span>转接</span></li>
+            <li><a href="#" id="conferenceBtn" class="hy_btn"></a><span>会议</span></li>
+            <li><a href="#" id="hangUpBtn" class="gj_btn"></a><span>挂机</span></li>
+            <li><a href="#" id="resetStatus" class="qz_btn"></a><span>强置</span></li>
+            <li><a href="#" id="onLineBtn" class="sx_btn on"></a><span>签入</span></li>
+        </ul>
+    </div>
+</div>
+</td>
+<td width="30%">
+<div>
+    <div  style="padding-left: 10px; ">
+        &nbsp; &nbsp;  外呼设置：
+        <label for="videoCallBtn"> <input type="radio" value="video" name="callType" id="videoCallBtn" />视频外呼</label>  &nbsp;&nbsp;
+        <label for="audioCallBtn"> <input type="radio" value="audio"  name="callType" checked="checked" id="audioCallBtn"  />语音外呼</label>  <br />
+
+        &nbsp; &nbsp; 视频清晰度:
+        <label for="videoLevelSelect"></label><select id="videoLevelSelect">
+        </select>
+        <input type="button" id="reInviteVideoBtn" title="发送视频邀请，可把音频通话转换为视频通话。"
+         onclick="_phoneBar.reInviteVideoCall();"       value="视频邀请" disabled="disabled" >
+
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <label for="videoListSelect"></label>
+         <select id="videoListSelect">
+             <option value="">请选择视频</option>
+             <option value="/usr/local/freeswitchvideo/share/freeswitch/sounds/bank.mp4">客服实例视频</option>
+             <option value="/usr/local/freeswitchvideo/share/freeswitch/sounds/conference.mp4">多方会议视频</option>
+             <option value="/usr/local/freeswitchvideo/share/freeswitch/sounds/15-seconds.mp4">15-seconds-demo</option>
+
+         </select>
+        <input type="button" id="sendVideoFileBtn" title="推送视频给对方，以便结束当前通话。"
+               onclick="_phoneBar.sendVideoFile($('#videoListSelect').val());"   value="推送视频" disabled="disabled" >
+
+    </div>
+</div>
+</td>
+</tr>
+
+<tr id="transfer_area" width="100%" style="display: none">
+
+        <td colspan="2" width="100%" style="padding-left: 140px; padding-top: 30px;">
+            <table width="100%">
+                 <tr>
+                       <td width="90">业务组   </td>
+                       <td width="90">坐席成员</td>
+                       <td>&nbsp; </td>
+                 </tr>
+                <tr>
+                    <td>
+                        <select size="10" id="transfer_to_groupIds" name="transfer_to_groupIds">
+                            <option value="">请选择</option>
+                        </select>
+                    </td>
+
+                    <td>
+                        <select size="10" id="transfer_to_member" name="transfer_to_member">
+                            <option value="">请选择</option>
+                        </select>
+                    </td>
+                    <td valign="middle">
+                        <input type="button" name="doTransferBtn" id="doTransferBtn"
+                               onclick="_phoneBar.transferBtnClickUI('张三')"
+                               style="width: 70px;" value="转接电话" />
+                    </td>
+                </tr>
+            </table>
+        </td>
+
+</tr>
+
+</table>
+</form>
+
+<div id="chat-container">
+    <div id="chat-messages" class="message-container"></div>
+</div>
+
+<script>
+    // 以下是通话转接操作界面的功能
+    const transferToGroupId = document.getElementById("transfer_to_groupIds");
+    const transferToMember = document.getElementById("transfer_to_member");
+
+    // 填充 transfer_to_groupId 数据
+    function populateGroupIdOptions() {
+        transferToGroupId.length = 0; //清除所有选项
+        let groups = _phoneBar.callConfig.groups;
+        groups.forEach(group => {
+            const option = document.createElement("option");
+            option.value = group.groupId;
+            option.textContent = group.bizGroupName;
+            transferToGroupId.appendChild(option);
+        });
+        if(transferToGroupId.selectedIndex == -1){
+            transferToGroupId.selectedIndex = 0;
+        }
+    };
+
+    function refreshMemberIdList() {
+        const selectedGroupId = transferToGroupId.value;
+        if(selectedGroupId != "") {
+            let origValue = transferToMember.value;
+            populateMemberIdOptions(_phoneBar.callConfig.agentList, selectedGroupId);
+            //判断原始选择项是否还存在，存在则重新赋值;
+            let hasValue = transferToMember.querySelector(`option[value="${origValue}"]`) !== null;
+            if(hasValue) {
+                transferToMember.value = origValue;
+            }
+        }
+    }
+
+    // 根据选中的 groupId 填充 transfer_to_member 数据
+    function populateMemberIdOptions(members, selectedGroupId) {
+        if (!Array.isArray(members)) {
+            console.error("populateMemberOptions: members is not a Array.", members);
+            return;
+        }
+        transferToMember.innerHTML = '<option value="">请选择</option>';
+        members
+            .filter(member => member.groupId === selectedGroupId)
+       .forEach(member => {
+            const option = document.createElement("option");
+        const statusMap = { 1: "空闲", 2: "通话中", 3: "忙碌" };
+        option.value = member.opnum;
+        option.textContent = `${member.opnum}(${statusMap[member.agentStatus] || ""})`;
+        transferToMember.appendChild(option);
+      });
+    };
+
+    /* asr实时对话文本框的功能 */
+    _phoneBar.on(ccPhoneBarSocket.eventList.asr_process_started, function (msg) {
+        $(chatMessages).html("");
+    });
+    _phoneBar.on(ccPhoneBarSocket.eventList.asr_result_generate, function (msg) {
+        handleAsrMessage(msg);
+    });
+    _phoneBar.on(ccPhoneBarSocket.eventList.asr_process_end_customer, function (msg) {
+        handleAsrMessage(msg);
+    });
+    _phoneBar.on(ccPhoneBarSocket.eventList.asr_process_end_agent, function (msg) {
+        handleAsrMessage(msg);
+    });
+    const chatMessages = document.getElementById('chat-messages');
+    $("#chat-container").hide();
+    function handleAsrMessage(data) {
+        $("#chat-container").show();
+        const { status, object } = data;
+        if (status === 619 && object) {
+            const { role, text, vadType } = object;
+            if(vadType == 1) {
+                addMessageToChat(role, text);
+            }
+        } else if (status === 620 || status === 621) {
+            addSystemMessage("对话已结束。");
+        }
+    }
+    function addMessageToChat(role, text) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'message ' + (role === 1 ? 'customer' : 'agent');
+
+        // 添加角色名称
+        const roleHeader = document.createElement('div');
+        roleHeader.className = 'message-header';
+        roleHeader.textContent = role === 1 ? '客户' : '我';
+
+        const messageContent = document.createElement('div');
+        messageContent.textContent = text;
+
+        // messageDiv.appendChild(roleHeader);
+        messageDiv.appendChild(messageContent);
+        chatMessages.appendChild(messageDiv);
+        scrollToBottom();
+    }
+    function addSystemMessage(text) {
+        const systemMessage = document.createElement('div');
+        systemMessage.className = 'system-message';
+        systemMessage.textContent = text;
+        chatMessages.appendChild(systemMessage);
+        scrollToBottom();
+    }
+    function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+</script>
+
+</body>
+</html>

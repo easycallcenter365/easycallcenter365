@@ -1,0 +1,14 @@
+<form action="http://127.0.0.1:8880/call-center/cdr-ex/record" method="post">
+
+<textarea name="cdr" id="cdr" rows=70 cols=500>
+</textarea>
+
+<input type="button" value="decode" onclick="setUnescapeData();">
+<input type="submit">
+<script>
+function setUnescapeData(){
+  document.getElementById("cdr").value = decodeURIComponent(document.getElementById('cdr').value);
+}
+</script>
+
+</form>

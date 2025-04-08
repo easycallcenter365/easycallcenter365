@@ -1,0 +1,1 @@
+BO(business object):业务对象。主要是将业务逻辑封装为一个对象，该对象可以包含一个或多个其他对象。如，"Principal"(委托人)，有"Name","Age"等属性，同时和"Employee"(雇员)有1对多的关系，这个"Principal"就可以作为一个与业务相关的PO。

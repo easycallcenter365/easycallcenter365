@@ -1,0 +1,20 @@
+﻿  <extension name="curl_extension_login">
+      <condition field="destination_number" expression="^\*\*6#$">
+	<action application="answer"/>
+        <action application="sleep" data="1000"/>
+	<action application="curl" data="http://192.168.1.246:7001/freeswitch/SetExtensionStatus.aspx?extension=${Caller_Id_Number}&action=login"/>
+        <action application="info"/> 
+        <action application="endless_playback" data="$${sounds_dir}/dtmf_operation/Extension_Login_success.wav" />
+      </condition>
+    </extension>
+
+
+  <extension name="curl_logout">
+      <condition field="destination_number" expression="^\*\*7#$">
+	<action application="answer"/>
+        <action application="sleep" data="1000"/>
+	<action application="curl" data="http://192.168.1.246:7001/freeswitch/SetExtensionStatus.aspx?extension=${Caller_Id_Number}&action=setstatus&param=1"/>
+        <action application="endless_playback" data="$${sounds_dir}/dtmf_operation/Extension_Logout.wav" />
+        <action application="info"/> 
+      </condition>
+    </extension>

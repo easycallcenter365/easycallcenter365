@@ -1,0 +1,212 @@
+@charset "utf-8";
+/* CSS Document */
+body{ background:#eef3fa;}
+
+html,body,table,tr,td,div,ol,ul,li,dl,dt,dd,dir,h1,h2,h3,h4,h5,h6,p{text-align: left; margin: 0px;padding: 0px;border: 0px;list-style-type: none; font-size:12px; font-weight:normal;}
+div,select,textarea,table td,table td,table tr{font-family:myFirstFont;font-size:12px; color:#768595;}
+
+.main{ margin:0px 10px;}
+
+/***头部区***/
+.head_btn{ height:50px; margin-bottom:10px;}
+
+#navigation {font: bold 12px/18px "微软雅黑", Helvetica, Arial, sans-serif; text-transform: uppercase; color:#768595; position:absolute; top:10px;}  
+#navigation:after { clear: both;content: "."; display: block; height: 0;visibility: hidden;}  
+#navigation ul {float: left; border-radius: 5px;/* box-shadow: 0 2px 2px rgba(0, 0, 0, 0.07); -webkit-box-shadow: 0 2px 2px rgba(0, 0, 0, 0.07); */overflow: hidden;}  
+#navigation li {  
+    float: left;  
+    border-style: solid;   
+    border-width: 1px;  
+    border-color: #dfe5e7 #dfe5e7 #dfe5e7 #dfe5e7;  
+    box-shadow: 0 1px rgba(255,255,255,1) inset;  
+    -webkit-box-shadow: 0 1px rgba(255,255,255,1) inset;  
+    background: #F7F7F7; /* Old browsers */  
+    background: -moz-linear-gradient(top, #F7F7F7 0%, #EDEDED 100%); /* FF3.6+ */  
+    background: -webkit-gradient(linear, left top, left bottombottom, color-stop(0%,#F7F7F7), color-stop(100%,#EDEDED)); /* Chrome,Safari4+ */  
+    background: -webkit-linear-gradient(top, #F7F7F7 0%,#EDEDED 100%); /* Chrome10+,Safari5.1+ */  
+    background: -o-linear-gradient(top, #F7F7F7 0%,#EDEDED 100%); /* Opera 11.10+ */  
+    background: -ms-linear-gradient(top, #F7F7F7 0%,#EDEDED 100%); /* IE10+ */  
+    background: linear-gradient(top, #F7F7F7 0%,#EDEDED 100%); /* W3C */  
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#F7F7F7', endColorstr='#EDEDED',GradientType=0 ); /* IE6-9 */      
+}  
+#navigation li:hover, #navigation li.current {  
+    box-shadow: 0 1px rgba(255,255,255,0.2) inset;  
+    -webkit-box-shadow: 0 1px rgba(255,255,255,0.2) inset;  
+    border-color: #095db1 !important;  
+    background: #095db1; /* Old browsers */  
+    background: -moz-linear-gradient(top, #095db1 0%, #095db1 100%); /* FF3.6+ */  
+    background: -webkit-gradient(linear, left top, left bottombottom, color-stop(0%,#095db1), color-stop(100%,#095db1)); /* Chrome,Safari4+ */  
+    background: -webkit-linear-gradient(top, #095db1 0%,#ff000 100%); /* Chrome10+,Safari5.1+ */  
+    background: -o-linear-gradient(top, #095db1 0%,#095db1 100%); /* Opera 11.10+ */  
+    background: -ms-linear-gradient(top, #095db1 0%,#095db1 100%); /* IE10+ */  
+    background: linear-gradient(top, #095db1 0%,#095db1 100%); /* W3C */  
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#095db1', endColorstr='#095db1',GradientType=0 ); /* IE6-9 */  
+}  
+#navigation a {display: block;padding: 5px 15px;color: #444;text-decoration: none; text-shadow: 0 1px #FFF; }  
+#navigation a:hover, #navigation li.current a { color: #FFF;text-shadow: 0 1px #000;}  
+#navigation li:first-child {border-left-color: #BABABA; border-radius: 5px 0 0 5px;}  
+#navigation li:last-child {border-radius: 0 5px 5px 0; } 
+
+#conference_member_list ul {float: left; overflow: hidden;  width: 100%;}
+#conference_member_list li  {
+    float: left;  
+    border-style: solid;   
+    border-width: 1px;  
+    border-color: #dfe5e7 #dfe5e7 #eef3fa #dfe5e7;  
+    width: 95%;
+    line-height: 35px;
+}
+
+
+.conf_name{
+   padding-left: 10px;
+   width: 100px;
+   display: inline-block
+}
+
+.conf_phone{
+   width: 120px;
+   display: inline-block;
+}
+
+.conf_call_type{
+    padding-left: 10px;
+    width: 50px;
+    display: inline-block
+}
+
+.conf_video_level{
+    padding-left: 10px;
+    padding-right: 10px;
+    width: 50px;
+    display: inline-block
+}
+
+.conf_status{
+    width: 120px;
+    display: inline-block;
+}
+
+.conf_mute{
+    width: 40px;
+    display: inline-block;
+    padding-top: 3px;
+}
+
+.conf_vmute{
+    width: 40px;
+    display: inline-block;
+    padding-top: 3px;
+}
+
+.conf_remove{
+   width: 35px;
+    display: inline-block;
+}
+.conf_re_invite{
+    width: 35px;
+    display: inline-block;
+}
+ 
+.head_dial{ padding-top:2px;}
+.dial{ float:left;}
+.dial dt{ padding-bottom:2px;}
+.dial dt input{vertical-align:middle;}
+.tel_txt{ border:1px solid #dfe5e7; border-radius:3px;  height:35px; font-size:16px; background:#FFF; color:#768595; text-indent:5px; width:120px;}
+.keyboard{ background:url(./images/keyboard.png) no-repeat; border:0; width:25px; height:18px; cursor:pointer; margin:auto 10px auto 2px;}
+.next_btn{border-radius:5px; background: url(./images/next.png) no-repeat 10px 5px #8b9eb6; width:120px; height:25px; line-height:25px; border:0; color:#FFF;  text-align:center; cursor:pointer; text-indent:20px;}
+.dial dd input,.dial dd ul{ float:left;}
+.dial dd ul{border:1px solid #dfe5e7; background:#FFF; border-radius:3px;  height:auto; width:118px; margin-left:2px;}
+.dial dd ul li{height:auto; line-height:23px; margin-left:10px; padding-left:16px;}
+.dial dd ul li.status1{ background:url(./images/li.png) no-repeat 0 0; color:#f39700;}
+.dial dd ul li.status2{ background:url(./images/li.png) no-repeat 0 -20px; color:#98bf40;}
+.dial dd ul li.status3{ background:url(./images/li.png) no-repeat 0 -40px; color:#98bf40;}
+.dial dd ul li.status4{ background:url(./images/li.png) no-repeat 0 -59px; color:#23a9f6;}
+.dial dd ul li.status5{ background:url(./images/li.png) no-repeat 0 -80px; color:#adadad;}
+.dial dd b{ line-height:23px; padding-left:1px;}
+
+.dial_btn{ float:left;}
+.dial_btn li{ float:left; margin-left:12px;text-align:center;}
+.dial_btn li a{ display:block; border-radius:10px; border:1px solid #dfe5e7; width:48px; height:48px; margin:4px auto;}
+ 
+
+.wh_btn,.gj_btn,.zj_btn,.bc_btn,.zjie_btn,.myd_btn,.jt_btn,.qca_btn,.lj_btn,.qc_btn,.hy_btn,.sx_btn,.xx_btn,.wc_btn,.jy_btn,.xz_btn,.sm_btn,.qz_btn,.qiangjie_btn,.lanjie_btn{background:url(./images/dial_off.png) no-repeat;background-color:#FFF;}
+.wh_btn.on,.zj_btn.on,.gj_btn.on,.bc_btn.on,.zjie_btn.on,.myd_btn.on,.jt_btn.on,.qca_btn.on,.lj_btn.on,.qc_btn.on,.hy_btn.on,.sx_btn.on,.xx_btn.on,.wc_btn.on,.jy_btn.on,.xz_btn.on,.sm_btn.on{ background:url(./images/dial_on.png) no-repeat;}
+
+.wh_btn,.wh_btn.on{ background:url(./images/phonebar/call.png) no-repeat;  -webkit-filter: grayscale(100%);-moz-filter: grayscale(100%);-ms-filter: grayscale(100%); -o-filter: grayscale(100%);filter: grayscale(100%);filter: gray;}/* 外呼 */
+.wh_btn.on{ background:url(./images/phonebar/call.png) no-repeat;  -webkit-filter: grayscale(1%);-moz-filter: grayscale(1%);-ms-filter: grayscale(1%); -o-filter: grayscale(1%);filter: grayscale(1%);filter: gray;}   
+.gj_btn,.gj_btn.on{background:url(./images/phonebar/hangup_enable.png) no-repeat; -webkit-filter: grayscale(100%);-moz-filter: grayscale(100%);-ms-filter: grayscale(100%); -o-filter: grayscale(100%);filter: grayscale(100%);filter: gray;}/* 挂机*/
+.gj_btn.on{ background:url(./images/phonebar/hangup_enable.png) no-repeat; -webkit-filter: grayscale(1%);-moz-filter: grayscale(1%);-ms-filter: grayscale(1%); -o-filter: grayscale(1%);filter: grayscale(1%);filter: gray;}   
+.zj_btn,.zj_btn.on{ background-position:-61px -1px;}/* 摘机*/
+.zj_btn.on{background-color:#999999; border:1px solid #999999;}
+.bc_btn,.bc_btn.on{background:url(./images/phonebar/hold.png) no-repeat; -webkit-filter: grayscale(100%);-moz-filter: grayscale(100%);-ms-filter: grayscale(100%); -o-filter: grayscale(100%);filter: grayscale(100%);filter: gray;}/* 保持 */
+.bc_btn.on{background:url(./images/phonebar/hold.png) no-repeat; -webkit-filter: grayscale(1%);-moz-filter: grayscale(1%);-ms-filter: grayscale(1%); -o-filter: grayscale(1%);filter: grayscale(1%);filter: gray;}   
+.zjie_btn,.zjie_btn.on{background:url(./images/phonebar/transfer.png) no-repeat; -webkit-filter: grayscale(100%);-moz-filter: grayscale(100%);-ms-filter: grayscale(100%); -o-filter: grayscale(100%);filter: grayscale(100%);filter: gray;}/* 转接 */
+.zjie_btn.on{background:url(./images/phonebar/transfer.png) no-repeat; -webkit-filter: grayscale(1%);-moz-filter: grayscale(1%);-ms-filter: grayscale(1%); -o-filter: grayscale(1%);filter: grayscale(1%);filter: gray;}   
+.myd_btn,.myd_btn.on{background-position:-151px -2px; }/* 满意度 */
+.myd_btn.on{ background-color:#f7ae2d; border:1px solid #f7ae2d;}
+.jt_btn,.jt_btn.on{background:url(./images/phonebar/mute.png) no-repeat; -webkit-filter: grayscale(100%);-moz-filter: grayscale(100%);-ms-filter: grayscale(100%); -o-filter: grayscale(100%);filter: grayscale(100%);filter: gray;}/* 监听 */
+.jt_btn.on{background:url(./images/phonebar/mute.png) no-repeat;-webkit-filter: grayscale(1%);-moz-filter: grayscale(1%);-ms-filter: grayscale(1%); -o-filter: grayscale(1%);filter: grayscale(1%);filter: gray;}   
+.qca_btn,.qca_btn.on{ background-position:-211px -1px;}/* 强插 */
+.qca_btn.on{ background-color:#ed4e4e; border:1px solid #ed4e4e;}
+.lj_btn,.lj_btn.on{ background-position:-242px 0px;}/* 拦截 */
+.lj_btn.on{ background-color:#999999; border:1px solid #999999;}
+.qc_btn,.qc_btn.on{ background-position:-271px -1px;}/* 强拆 */
+.qc_btn.on{ background-color:#ed4e4e; border:1px solid #ed4e4e;}
+.hy_btn,.hy_btn.on{ background:url(./images/phonebar/conference.png) no-repeat;}/* 会议 */
+.hy_btn.on{background:url(./images/phonebar/conference.png) no-repeat;-webkit-filter: grayscale(1%);-moz-filter: grayscale(1%);-ms-filter: grayscale(1%); -o-filter: grayscale(1%);filter: grayscale(1%);filter: gray;}   
+.sx_btn,.sx_btn.on{  background:url(./images/phonebar/online.png) no-repeat;}/* 上线 */
+.sx_btn.on{background:url(./images/phonebar/online.png) no-repeat; -webkit-filter: grayscale(1%);-moz-filter: grayscale(1%);-ms-filter: grayscale(1%); -o-filter: grayscale(1%);filter: grayscale(1%);filter: gray;}   
+.xx_btn,.xx_btn.on{ background-position:-360px 0px;}/* 休息 */
+.xx_btn.on{ background-color:#23a9f6; border:1px solid #23a9f6;}
+.wc_btn,.wc_btn.on{ background-position:-392px 0px;}/* 外出 */
+.wc_btn.on{ background-color:#d51776; border:1px solid #d51776;}
+.jy_btn,.jy_btn.on{ background-position:-421px -1px;}/* 静音 */
+.jy_btn.on{ background-color:#999999; border:1px solid #999999;}
+.xz_btn,.xz_btn.on{ background:url(./images/phonebar/setFree.png) no-repeat;  -webkit-filter: grayscale(100%);-moz-filter: grayscale(100%);-ms-filter: grayscale(100%); -o-filter: grayscale(100%);filter: grayscale(100%);filter: gray;} /* 置闲 */
+ .xz_btn.on{background:url(./images/phonebar/setFree.png) no-repeat; -webkit-filter: grayscale(1%);-moz-filter: grayscale(1%);-ms-filter: grayscale(1%); -o-filter: grayscale(1%);filter: grayscale(1%);filter: gray;}  
+.sm_btn,.sm_btn.on{ background:url(./images/phonebar/busy_enable.png) no-repeat; -webkit-filter: grayscale(100%);-moz-filter: grayscale(100%);-ms-filter: grayscale(100%); -o-filter: grayscale(100%);filter: grayscale(100%);filter: gray;} /* 置忙 */
+.sm_btn.on{background:url(./images/phonebar/busy_enable.png) no-repeat; -webkit-filter: grayscale(1%);-moz-filter: grayscale(1%);-ms-filter: grayscale(1%); -o-filter: grayscale(1%);filter: grayscale(1%);filter: gray;}   
+.qz_btn,.qz_btn.on{background:url(./images/phonebar/reset.png) no-repeat;}/* 强置 */
+.qz_btn.on{-webkit-filter: grayscale(100%);-moz-filter: grayscale(100%);-ms-filter: grayscale(100%); -o-filter: grayscale(100%);filter: grayscale(100%);filter: gray;}.lanjie_btn,.lanjie_btn.on{background:url(./images/phonebar/lanjie.png) no-repeat;}/* 拦截 */
+.lanjie_btn.on{-webkit-filter: grayscale(100%);-moz-filter: grayscale(100%);-ms-filter: grayscale(100%); -o-filter: grayscale(100%);filter: grayscale(100%);filter: gray;}
+qiangjie_btn,.qiangjie_btn.on{background:url(./images/phonebar/qiangjie.png) no-repeat;}/* 抢接 */
+.qiangjie_btn.on{-webkit-filter: grayscale(100%);-moz-filter: grayscale(100%);-ms-filter: grayscale(100%); -o-filter: grayscale(100%);filter: grayscale(100%);filter: gray;}   
+
+/* asr实时消息的对话框 */
+#chat-container {
+    width: 90%;
+    max-width: 600px;
+    margin: 20px auto;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+}
+.message {
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 8px;
+}
+.customer {
+    background-color: #F5F5F5;
+    align-self: flex-start;
+}
+.agent {
+    background-color: #95EC69;
+    align-self: flex-end;
+}
+.system-message {
+    text-align: center;
+    color: gray;
+    font-style: italic;
+}
+.message-container {
+    display: flex;
+    flex-direction: column;
+}
+.message-header {
+    font-weight: bold;
+    margin-bottom: 5px;
+}

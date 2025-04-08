@@ -1,0 +1,38 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.telerobot.fs.mybatis.persistence.ConferenceMapper">
+
+    <resultMap id="ConferenceResultMap" type="com.telerobot.fs.entity.bo.ConferenceEntity">
+        <id property="id" column="id" />
+        <result property="moderator" column="moderator" />
+        <result property="userId" column="user_id" />
+        <result property="startTime" column="start_time" />
+        <result property="endTime" column="end_time" />
+        <result property="timeLen" column="time_len" />
+        <result property="confPassword" column="conf_password" />
+        <result property="maxConcurrency" column="max_concurrency" />
+        <result property="recordPath" column="record_path" />
+    </resultMap>
+
+ <insert id="addConference" parameterType="com.telerobot.fs.entity.bo.ConferenceEntity" >
+    INSERT INTO cc_conference_list (id, moderator, user_id, start_time, end_time, conf_password, max_concurrency, record_path, room_no)
+    VALUES (#{id}, #{moderator}, #{userId}, #{startTime}, #{endTime}, #{confPassword}, #{maxConcurrency}, #{recordPath}, #{roomNo})
+  </insert>
+
+    <update id="updateConference" parameterType="com.telerobot.fs.entity.bo.ConferenceEntity">
+    UPDATE cc_conference_list
+    SET end_time = #{endTime}, time_len = #{timeLen}
+    WHERE id = #{id}
+  </update>
+
+
+
+<select id="getConferenceByModerator" resultMap="ConferenceResultMap" parameterType="Long">
+    SELECT id, moderator, user_id, start_time, end_time, conf_password, max_concurrency
+    FROM cc_conference_list
+    WHERE id = #{id}
+ </select>
+
+ </mapper>

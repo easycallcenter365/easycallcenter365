@@ -1,0 +1,30 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.telerobot.fs.mybatis.persistence.ConferenceMemberMapper">
+
+    <resultMap id="ConferenceMemberResultMap" type="com.telerobot.fs.entity.bo.ConferenceMemberRecord">
+        <id property="id" column="id" />
+        <result property="conferenceId" column="conference_id" />
+        <result property="phone" column="phone" />
+        <result property="userId" column="user_id" />
+        <result property="startTime" column="start_time" />
+        <result property="endTime" column="end_time" />
+        <result property="timeLen" column="time_len" />
+    </resultMap>
+
+    <insert id="insertConferenceMember" parameterType="com.telerobot.fs.entity.bo.ConferenceMemberRecord">
+    INSERT INTO cc_conference_members (id, conference_id, phone, user_id, start_time, end_time, time_len)
+    VALUES (#{id}, #{conferenceId}, #{phone}, #{userId}, #{startTime}, #{endTime}, #{timeLen})
+  </insert>
+
+    <update id="updateConferenceMember" parameterType="com.telerobot.fs.entity.bo.ConferenceMemberRecord">
+    UPDATE cc_conference_members
+    SET conference_id = #{conferenceId}, phone = #{phone}, user_id = #{userId},
+        start_time = #{startTime}, end_time = #{endTime}
+    WHERE id = #{id} AND conference_id = #{conferenceId}
+  </update>
+
+    <!-- 添加其他查询方法，根据需要实现 -->
+</mapper>
