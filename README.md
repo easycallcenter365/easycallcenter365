@@ -2,7 +2,7 @@
 
 ![easycallcenter365](logo.jpg) 
 
-基于FreeSWITCH和大模型的智能语音客服
+基于FreeSWITCH和大模型的智能电话客服系统。
 
 ### 功能列表
 
@@ -14,10 +14,9 @@
 
 ### 技术交流 && 商业咨询
 
+   bug反馈或者咨询问题请在gitee/github上，新建 Issue，并贴上日志。
+
   ![联系方式](wetchat.png) 
-  
-   bug或者咨询问题请在gitee/github上，新建 Issue，并贴上日志。
-  
 
 ### 是否有一键安装包，可以快速体验该产品?
 
