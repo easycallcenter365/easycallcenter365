@@ -27,7 +27,7 @@
 
 ### 呼入电话的处理流程
 
-   [呼入电话的处理流程](docs/images/process-flow.png)
+   ![呼入电话的处理流程](docs/images/process-flow.png) 
    
 * 客户来电时，电话一般进入 public context 的拨号计划，然后在拨号计划中调用 curl 指令，
 curl 请求 easycallcenter365 的一个 api 接口，把通话uuid、主叫被叫等信息发送过去。通话被 easycallcenter365 接管。
