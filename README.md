@@ -25,6 +25,21 @@
 一键安装包内置了FreeSWITCH-1.10.11、funasr-0.1.9、easycallcenter365.jar、mysql-8。
 下载到本地后，按照目录中的"使用说明.txt" 导入虚拟机并启动，最后调整相关参数即可体验测试。
 
+### 呼入电话的处理流程
+
+   [呼入电话的处理流程](docs/images/process-flow.png)
+   
+* 客户来电时，电话一般进入 public context 的拨号计划，然后在拨号计划中调用 curl 指令，
+curl 请求 easycallcenter365 的一个 api 接口，把通话uuid、主叫被叫等信息发送过去。通话被 easycallcenter365 接管。
+
+* easycallcenter365 启动录音/录像。easycallcenter365 把 faq.txt 作为上下文，附带电话接听的场景提示词，发送给 DeepSeek v3。
+* DeepSeek 以流式http响应的返回开场白，easycallcenter365 一边接收文本，一边调用 speak 指令发送文本进行语音合成。
+* FreeSWITCH 的 mod_aliyun_tts 收到语音合成指令后，提取参数中的文本，然后连接语音合成服务器，发送语音合成请求。
+* 由于整个过程中，文本是不断产生的，mod_aliyun_tts 一边发送语音合成文本，一边接收合成后的语音流数据，同时进行解码语音并播放。
+* 播放完毕后，FreeSWITCH 启动语音识别的检测。通过 mod_funasr 或者 unimrcp 模块实现语音流的发送及语音识别结果文本的接收。
+* 通过 event socket 消息，FreeSWITCH 把收到的语音识别结果文本，发送给 easycallcenter365。
+* easycallcenter365 把语音识别结果文本，附带前面交互的消息，一起打包，发送给  DeepSeek 。
+* 接下来继续循环，直到电话通话结束。
 
 ### 运行环境
 
@@ -33,6 +48,46 @@
 ### 如何编译 easycallcenter365
 
 参考  [Build.md](Build.md)
+
+### 编译FreeSWITCH模块
+ 
+   这里主要是指 流式语音合成 以及 语音识别 模块。
+   参考 https://gitee.com/easycallcenter365/free-switch-modules-libs 
+   
+### 配置FreeSWITCH
+
+* 配置拨号计划
+
+在public.xml中加入下面的xml代码，确保插入到文件最前的位置。
+```xml
+<extension name="inbound_call"> 
+          <condition field="destination_number"  expression="^(\d{7,13})$" >
+              <action application="set" data="inherit_codec=true"/>
+              <action application="answer" />
+	          <action application="start_dtmf"/> 
+	          <action application="log" data="INFO inbound call:  ${uuid}  caller=${caller_id_number}, callee=$1 " />
+              <action application="set" data="continue_on_fail=true"/>
+              <action application="set" data="hangup_after_bridge=false"/>
+	          <action application="set" data="groupId=1"/>
+	          <action application="set" data="send_silence_when_idle=-1"/>
+              <action application="curl" data="http://127.0.0.1:8880/call-center/inboundProcessor?remote_video_port=${remote_video_port}&amp;local-media-port=${local_media_port}&amp;uuid=${uuid}&amp;caller=${caller_id_number}&amp;callee=$1&amp;load-test-uuid=${uuid}&amp;group-id=${groupId}"/>
+              <action application="park" />
+          </condition>
+</extension>
+```   
+
+* 配置测试话机
+
+这里使用分机来模拟呼入电话，如果使用的是项目  https://gitee.com/easycallcenter365/free-switch-modules-libs  中的配置文件，默认的测试注册端口是5079。
+完整的话机注册信息如下:
+   
+  分机号： 你的手机号，比如 13800138000
+  
+  密码: 123456
+  
+  注册地址：虚拟机IP:5079 
+  
+  如果注册超时，请检查FreeSWITCH是否启动。
 
 ### 如何配置并运行 easycallcenter365
 
@@ -50,6 +105,12 @@
 * 查看日志
 
   tail -f /home/call-center/log/easycallcenter365.log 
+  
+* 拨打测试电话    
+
+  使用上一步注册的话机拨号: 1234567
+  
+  如果一切正常就可以听到语音播报，如果异常请查看 easycallcenter365.log 以及 FreeSWITCH 日志。
 
 * 注意事项
 
@@ -57,11 +118,7 @@
   
   如果修改了 easycallcenter365.jar 的 server.port，
   请同步修改 FreeSWITCH拨号计划 public.xml 中的引用。
-  
 
-### 编译FreeSWITCH模块
-
-   参考 https://gitee.com/easycallcenter365/free-switch-modules-libs 
    
 ### 目前支持哪些语音识别方式?   
 
