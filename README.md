@@ -53,7 +53,7 @@ curl 请求 easycallcenter365 的一个 api 接口，把通话uuid、主叫被�
 ### 编译FreeSWITCH模块
  
    这里主要是指 流式语音合成 以及 语音识别 模块。
-   参考 https://gitee.com/easycallcenter365/free-switch-modules-libs 
+   参考 https://gitee.com/easycallcenter365/freeswitch-modules-libs 
    
 ### 配置FreeSWITCH
 
@@ -79,7 +79,7 @@ curl 请求 easycallcenter365 的一个 api 接口，把通话uuid、主叫被�
 
 * 配置测试话机
 
-这里使用分机来模拟呼入电话，如果使用的是项目  https://gitee.com/easycallcenter365/free-switch-modules-libs  中的配置文件，默认的测试注册端口是5079。
+这里使用分机来模拟呼入电话，如果使用的是项目  https://gitee.com/easycallcenter365/freeswitch-modules-libs  中的配置文件，默认的测试注册端口是5079。
 完整的话机注册信息如下:
    
   分机号： 你的手机号，比如 13800138000
