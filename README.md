@@ -50,6 +50,17 @@ curl 请求 easycallcenter365 的一个 api 接口，把通话uuid、主叫被�
 
 参考  [Build.md](Build.md)
 
+### 设置Debian12的中文支持
+
+解决乱码问题： vim ~/.profile  追加配置：
+
+```bash
+    LANG=zh_CN.UTF-8
+    LANGUAGE=zh_CN.UTF-8    
+```	
+
+如果不设置，会导致语音合成异常。
+
 ### 编译FreeSWITCH模块
  
    这里主要是指 流式语音合成 以及 语音识别 模块。
