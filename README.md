@@ -55,8 +55,8 @@ curl 请求 easycallcenter365 的一个 api 接口，把通话uuid、主叫被�
 解决乱码问题： vim ~/.profile  追加配置：
 
 ```bash
-    LANG=zh_CN.UTF-8
-    LANGUAGE=zh_CN.UTF-8    
+LANG=zh_CN.UTF-8
+LANGUAGE=zh_CN.UTF-8    
 ```	
 
 如果不设置，会导致语音合成异常。让配置立即生效：
