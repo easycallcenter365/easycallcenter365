@@ -77,18 +77,18 @@ source ~/.profile
 在public.xml中加入下面的xml代码，确保插入到文件最前的位置。
 ```xml
 <extension name="inbound_call"> 
-          <condition field="destination_number"  expression="^(\d{7,13})$" >
-              <action application="set" data="inherit_codec=true"/>
-              <action application="answer" />
-	          <action application="start_dtmf"/> 
-	          <action application="log" data="INFO inbound call:  ${uuid}  caller=${caller_id_number}, callee=$1 " />
-              <action application="set" data="continue_on_fail=true"/>
-              <action application="set" data="hangup_after_bridge=false"/>
-	          <action application="set" data="groupId=1"/>
-	          <action application="set" data="send_silence_when_idle=-1"/>
-              <action application="curl" data="http://127.0.0.1:8880/call-center/inboundProcessor?remote_video_port=${remote_video_port}&amp;local-media-port=${local_media_port}&amp;uuid=${uuid}&amp;caller=${caller_id_number}&amp;callee=$1&amp;load-test-uuid=${uuid}&amp;group-id=${groupId}"/>
-              <action application="park" />
-          </condition>
+	  <condition field="destination_number"  expression="^(\d{7,13})$" >
+		  <action application="set" data="inherit_codec=true"/>
+		  <action application="answer" />
+		  <action application="start_dtmf"/> 
+		  <action application="log" data="INFO inbound call:  ${uuid}  caller=${caller_id_number}, callee=$1 " />
+		  <action application="set" data="continue_on_fail=true"/>
+		  <action application="set" data="hangup_after_bridge=false"/>
+		  <action application="set" data="groupId=1"/>
+		  <action application="set" data="send_silence_when_idle=-1"/>
+		  <action application="curl" data="http://127.0.0.1:8880/call-center/inboundProcessor?remote_video_port=${remote_video_port}&amp;local-media-port=${local_media_port}&amp;uuid=${uuid}&amp;caller=${caller_id_number}&amp;callee=$1&amp;load-test-uuid=${uuid}&amp;group-id=${groupId}"/>
+		  <action application="park" />
+	  </condition>
 </extension>
 ```   
 
@@ -160,11 +160,11 @@ source ~/.profile
   
   找到   
 ```java     
-        var scriptServer = "192.168.14.218";		
-        var  extnum = '1018'; //分机号		
-        var opnum = '8001'; //工号		
-        var skillLevel = 9; //技能等级		
-        var groupId = 1; // 业务组id  
+var scriptServer = "192.168.14.218";		
+var  extnum = '1018'; //分机号		
+var opnum = '8001'; //工号		
+var skillLevel = 9; //技能等级		
+var groupId = 1; // 业务组id  
 ```		
 		
   按照提示修改即可。
