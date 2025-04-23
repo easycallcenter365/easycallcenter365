@@ -1,10 +1,7 @@
 package com.telerobot.fs.robot;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.telerobot.fs.acd.AcdSqlQueue;
-import com.telerobot.fs.acd.CallHandler;
-import com.telerobot.fs.acd.InboundGroupHandler;
 import com.telerobot.fs.config.AppContextProvider;
 import com.telerobot.fs.config.SystemConfig;
 import com.telerobot.fs.config.ThreadLocalTraceId;
@@ -21,7 +18,6 @@ import io.netty.util.internal.StringUtil;
 import link.thingscloud.freeswitch.esl.EslConnectionUtil;
 import link.thingscloud.freeswitch.esl.constant.EventNames;
 import link.thingscloud.freeswitch.esl.transport.event.EslEvent;
-import link.thingscloud.freeswitch.esl.transport.message.EslHeaders;
 import link.thingscloud.freeswitch.esl.transport.message.EslMessage;
 import org.apache.commons.lang.StringUtils;
 
@@ -365,6 +361,18 @@ public class RobotChat extends RobotBase {
                         getTraceId(), spentCost, JSON.toJSONString(aiphoneRes)
                 );
 
+                /*
+                aiphoneRes = new  LlmAiphoneRes();
+                aiphoneRes.setStatus_code(1);
+                aiphoneRes.setClose_phone(0);
+                aiphoneRes.setIfcan_interrupt(0);
+                aiphoneRes.setJsonResponse(true);
+                aiphoneRes.setBody("{\n" +
+                        "    \"tool\": \"transfer_to_agent\",\n" +
+                        "    \"arguments\": {}\n" +
+                        "}");
+                 */
+
                 if(aiphoneRes.isJsonResponse()){
                     LlmToolRequest toolRequest = JSON.parseObject(
                             aiphoneRes.getBody(), LlmToolRequest.class);
@@ -386,10 +394,7 @@ public class RobotChat extends RobotBase {
 
                         this.processFsMsg(this.generateHangupEvent("transferToAgent"));
                         AppContextProvider.getBean(InboundDetailService.class).insertInbound(callDetailNew);
-                        CallHandler callHandler = new CallHandler(callDetailNew);
-                        if (InboundGroupHandler.addCallToQueue(callHandler, callDetailNew.getGroupId())) {
-                            logger.info("{} Successfully add call to acd queue", callDetailNew.getUuid());
-                        }
+                        TransferToAgent.transfer(callDetailNew);
                         return;
                     }
 

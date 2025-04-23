@@ -18,8 +18,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URLDecoder;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -27,11 +29,21 @@ import java.util.zip.ZipOutputStream;
 
 /**
  * 工具类
- * 
- * @date:2016年12月4日 下午3:10:03
  */
 public class CommonUtils<T>  {
 	private static final Logger logger = LoggerFactory.getLogger(CommonUtils.class);
+
+	public static Map<String, String> parseUrlQueryString(String queryString) throws UnsupportedEncodingException {
+		Map<String, String> queryPairs = new HashMap<>(16);
+		String[] pairs = queryString.split("&");
+		for (String pair : pairs) {
+			int idx = pair.indexOf("=");
+			String key = URLDecoder.decode(pair.substring(0, idx), "UTF-8");
+			String value = idx > 0 && pair.length() > idx + 1 ? URLDecoder.decode(pair.substring(idx + 1), "UTF-8") : "";
+			queryPairs.put(key, value);
+		}
+		return queryPairs;
+	}
 
 	private static final String FUN_ASR_MODE_ONLINE = "2pass-online";
 	private static final String FUN_ASR_MODE_OFFLINE = "2pass-offline";

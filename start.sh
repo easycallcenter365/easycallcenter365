@@ -1,0 +1,1 @@
+nohup /usr/local/jdk1.8.0_131/bin/java -Dfile.encoding=UTF-8  -jar  easyCallcenter365.jar > /dev/null 2>&1 &
