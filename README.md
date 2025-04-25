@@ -116,7 +116,7 @@ source ~/.profile
 
 * 拷贝 docs\kb\下的文件到  model-faq-dir
 
-* 启动 nohup java -jar easycallcenter365.jar > /dev/null 2>&1 &
+* 启动 nohup java -Dfile.encoding=UTF-8  -jar  easyCallcenter365.jar > /dev/null 2>&1 &
 
 * 查看日志
 
