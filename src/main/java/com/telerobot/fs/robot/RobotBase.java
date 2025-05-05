@@ -1,25 +1,15 @@
 package com.telerobot.fs.robot;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.telerobot.fs.config.AppContextProvider;
 import com.telerobot.fs.config.SystemConfig;
 import com.telerobot.fs.entity.bo.InboundDetail;
 import com.telerobot.fs.entity.bo.RobotInteractiveParam;
-import com.telerobot.fs.entity.dto.LlmAiphoneRes;
-import com.telerobot.fs.entity.pojo.LlmToolRequest;
 import com.telerobot.fs.entity.pojo.SpeechResultEntity;
 import com.telerobot.fs.utils.CommonUtils;
-import com.telerobot.fs.utils.FileUtils;
 import com.telerobot.fs.utils.ThreadPoolCreator;
 import com.telerobot.fs.utils.ThreadUtil;
-import link.thingscloud.freeswitch.esl.EslConnectionDetail;
 import link.thingscloud.freeswitch.esl.EslConnectionPool;
 import link.thingscloud.freeswitch.esl.EslConnectionUtil;
 import link.thingscloud.freeswitch.esl.IEslEventListener;
-import okhttp3.*;
-import okio.BufferedSource;
 import org.apache.commons.lang.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -30,9 +20,14 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.SecureRandom;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.LongAdder;
 
@@ -44,18 +39,9 @@ public abstract class RobotBase implements IEslEventListener {
     public static final  String NO_VOICE = "NO_VOICE";
 
     /**
-     * 大模型底座相关的三个参数请在数据库中cc_params表中设置
-     */
-    private static final String API_KEY = SystemConfig.getValue("model-api-key");
-    private static  final  String BASE_URL = SystemConfig.getValue("model-url");
-    private static final String MODEL_NAME =  SystemConfig.getValue("model-name");
-
-
-    /**
      *  交互轮次;
      */
     protected volatile LongAdder talkRound = new LongAdder();
-
 
     /**
      * 当前机器人数量； AtomicInteger 在高并发下导致cpu飙高;
@@ -107,36 +93,29 @@ public abstract class RobotBase implements IEslEventListener {
 
     protected static boolean asrPauseEnabled;
 
-    /**
-     *  faq问题手册内容
-     */
-    protected static String faq;
-
-    /**
-     *  大模型提示词内容
-     */
-    protected static String llmTips;
+    protected IChatRobot chatRobot;
 
     static {
         maxWaitTimeMills = 1000 * Long.parseLong(SystemConfig.getValue("max-wait-time-after-vad-start", "11"));
         asrPauseEnabled = Boolean.parseBoolean(SystemConfig.getValue("asr-pause-enabled", "true"));
 
-        String modelFaqDir = SystemConfig.getValue("model-faq-dir", "/home/call-center/kb/");
-        String modelFaqPath = modelFaqDir + "faq.txt";
-        faq = FileUtils.ReadFile(modelFaqPath, "utf-8");
-        if(StringUtils.isEmpty(faq)){
-            logger.error("cant not read file model-faq-path = {} , check whether the file exists!", modelFaqPath);
-            System.exit(0);
+        String chatBotType = SystemConfig.getValue("chat-bot-type");
+        if(StringUtils.isEmpty(chatBotType)){
+            logger.error(" param missing: chat-bot-type , chat process done.");
+            System.exit(1);
         }
-        logger.info("****** faq file content: {}", faq);
+    }
 
-        String llmTipsPath = modelFaqDir + "llmTips.txt";
-        llmTips = FileUtils.ReadFile(llmTipsPath, "utf-8");
-        if(StringUtils.isEmpty(llmTips)){
-            logger.error("cant not read file  llmTipsPath = {} ，check whether the file exists!", llmTipsPath);
-            System.exit(0);
+    protected void createChatBot(){
+        try {
+            String chatBotType = SystemConfig.getValue("chat-bot-type");
+            chatRobot = (IChatRobot) (Class.forName("com.telerobot.fs.robot.impl." + chatBotType).newInstance());
+            chatRobot.setUuid(uuid);
         }
-        logger.info("****** llmTips content: {}", llmTips);
+        catch (Throwable throwable){
+           logger.error("{} cant not create chatRobot object: {} ", getTraceId(), CommonUtils.getStackTraceString(throwable.getStackTrace())  );
+            System.exit(1);
+        }
     }
 
     /**
@@ -264,215 +243,13 @@ public abstract class RobotBase implements IEslEventListener {
         return waitMills;
     }
 
-    private static final OkHttpClient client =  new OkHttpClient.Builder()
-            .connectTimeout(90, TimeUnit.SECONDS)
-            .readTimeout(90, TimeUnit.SECONDS)
-            .build();
-
-    private int ttsTextLength = 0;
-    private ArrayBlockingQueue<String> ttsTextCache = new ArrayBlockingQueue<String>(2000);
-    private final  String[] pauseFlags = new String[]{
-            "？", "?",
-            "，", ",",
-            "；", ";",
-            "。", ".",
-            "、",
-            "！", "!",
-            "：", ":"
-    };
-    private boolean checkPauseFlag(String input){
-        String lastChar = input.substring(input.length() - 1);
-        for (String flag : pauseFlags) {
-            if(flag.equalsIgnoreCase(lastChar)){
-                return true;
-            }
-        }
-        return false;
-    }
-    private void sendToTts() {
-        StringBuilder tmpText = new StringBuilder("");
-        while (ttsTextCache.peek() != null) {
-            tmpText.append(ttsTextCache.poll());
-        }
-        String text = tmpText.toString();
-        sendTtsRequest(text);
-        ttsTextLength = 0;
-    }
-
-    List<JSONObject> llmRoundMessages = new ArrayList<>();
-    private volatile boolean firstRound = true;
-    protected String getDialogueContent(){
-        List<JSONObject> chatMsg = new ArrayList<>();
-        if(llmRoundMessages.size() > 3){
-            for (int i = 3; i < llmRoundMessages.size(); i++) {
-                chatMsg.add(llmRoundMessages.get(i));
-            }
-        }
-        return JSON.toJSONString(chatMsg);
-    }
-
-    protected LlmAiphoneRes  talkWithLargeModel(String question) throws IOException {
-        LlmAiphoneRes aiphoneRes = new  LlmAiphoneRes();
-        aiphoneRes.setStatus_code(1);
-        aiphoneRes.setClose_phone(0);
-        aiphoneRes.setIfcan_interrupt(0);
-        if(firstRound) {
-            firstRound = false;
-            JSONObject userMessage0 = new JSONObject();
-            userMessage0.put("role", "system");
-            String tips = llmTips + "\n" + faq;
-            userMessage0.put("content", tips);
-            llmRoundMessages.add(userMessage0);
-
-            JSONObject userMessage1 = new JSONObject();
-            userMessage1.put("role", "system");
-            userMessage1.put("content", "电话已经接通，请播报开场白，不超过30个字。");
-            llmRoundMessages.add(userMessage1);
-        }else{
-            JSONObject userMessage1 = new JSONObject();
-            userMessage1.put("role", "user");
-            userMessage1.put("content", question);
-            llmRoundMessages.add(userMessage1);
-        }
-
-        JSONObject response = sendStreamingRequest(aiphoneRes, llmRoundMessages);
-        llmRoundMessages.add(response);
-        return aiphoneRes;
-    }
-
-
-    private  JSONObject sendStreamingRequest(LlmAiphoneRes aiphoneRes, List<JSONObject> messages) throws IOException {
-        JSONObject requestBody = new JSONObject();
-        requestBody.put("model", MODEL_NAME);
-        requestBody.put("stream", true);
-        // enable stream output
-
-        JSONArray messagesArray = new JSONArray();
-        messagesArray.addAll(messages);
-        requestBody.put("messages", messagesArray);
-
-        RequestBody body = RequestBody.create(
-                MediaType.parse("application/json"),
-                requestBody.toJSONString()
-        );
-
-        Request request = new Request.Builder()
-                .url(BASE_URL)
-                .post(body)
-                .addHeader("Authorization", "Bearer " + API_KEY)
-                .build();
-
-        boolean recvData = false;
-        boolean jsonFormat = false;
-        long startTime = System.currentTimeMillis();
-
-        try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful()) {
-                logger.error("Model api error: http-code={}, msg={}, url={}",
-                        response.code(),
-                        response.message(),
-                        BASE_URL
-                );
-                throw new IOException("Unexpected code " + response);
-            }
-
-            BufferedSource source = response.body().source();
-            StringBuilder responseBuilder = new StringBuilder();
-
-            while (!source.exhausted()) {
-                String line = source.readUtf8Line();
-                if (line != null && line.startsWith("data: ")) {
-                    String jsonData = line.substring(6).trim(); // 去掉 "data: " 前缀
-                    if (jsonData.equals("[DONE]")) {
-                        break; // 流式响应结束
-                    }
-
-                    JSONObject jsonResponse = JSON.parseObject(jsonData);
-                    JSONObject message = jsonResponse.getJSONArray("choices")
-                            .getJSONObject(0)
-                            .getJSONObject("delta"); // 注意：流式响应中消息在 "delta" 字段中
-
-                    if (message.containsKey("content")) {
-                        String speechContent = message.getString("content");
-
-                        if (!recvData) {
-                            recvData = true;
-                            long costTime = (System.currentTimeMillis() - startTime);
-                            logger.info("http request cost time : {} ms.", costTime);
-                            aiphoneRes.setCostTime(costTime);
-                        }
-
-                        if (!StringUtils.isEmpty(speechContent)) {
-                            //  send to tts server
-                            String tmpText = speechContent.trim().replace(" ", "").replace(" ", "");
-                            if (tmpText.startsWith("{") && !jsonFormat) {
-                                logger.info("{} json response detected.", getTraceId());
-                                jsonFormat = true;
-                                aiphoneRes.setJsonResponse(true);
-                            }
-
-                            if (!StringUtils.isEmpty(tmpText) && !jsonFormat) {
-                                ttsTextCache.add(tmpText);
-                                ttsTextLength += tmpText.length();
-                                // 积攒足够的字数之后，才发送给tts，避免播放异常;
-                                if (ttsTextLength >= 10 && checkPauseFlag(tmpText)) {
-                                    sendToTts();
-                                }
-                            }
-                            responseBuilder.append(tmpText);
-                        }
-                    }
-                }
-            }
-
-            String answer = responseBuilder.toString();
-            logger.info("{} recv llm response end flag. answer={}", this.uuid, answer);
-            if(ttsTextLength > 0 && !jsonFormat){
-                sendToTts();
-            }
-
-            JSONObject finalResponse = new JSONObject();
-            finalResponse.put("role", "assistant");
-            finalResponse.put("content", answer);
-            aiphoneRes.setBody(answer);
-            return finalResponse;
-        }
-    }
-
-    /**
-     *  tts通道已关闭
-     */
-    protected volatile boolean ttsChannelClosed = true;
-
-    protected void breakSoundPlay(){
-        EslConnectionUtil.sendSyncApiCommand("uuid_break", uuid + " all");
-    }
-
-    protected void sendTtsRequest(String text){
-        if(StringUtils.isEmpty(text)){
-            return;
-        }
-        String voiceSource =  SystemConfig.getValue("stream-tts-voice-source", "aliyuntts");
-        String voiceCode =  SystemConfig.getValue("stream-tts-voice-name", "aixia");
-
-        if(ttsChannelClosed) {
-            breakSoundPlay();
-            EslConnectionUtil.sendExecuteCommand("speak", String.format("%s|%s|%s", voiceSource, voiceCode, text), uuid);
-            ttsChannelClosed = false;
-            logger.info("{} sendTtsRequest speak tts text {}", getTraceId(), text);
-        }else{
-            EslConnectionUtil.sendExecuteCommand("aliyuntts_resume", text, uuid);
-            logger.info("{} sendTtsRequest cosvtts_resume text {}", getTraceId(), text);
-        }
-    }
-
     /**
      *  当前esl连接池对象;
      */
     protected EslConnectionPool eslConnectionPool;
 
     protected  boolean getAllowInterrupt(){
-        return interactiveParam.getAllowInterrupt() == 1;
+        return Boolean.parseBoolean(SystemConfig.getValue("robot-speech-interrupt-allowed", "true"));
     }
 
     /**
@@ -795,7 +572,7 @@ public abstract class RobotBase implements IEslEventListener {
     protected void startMrcp(){
         String mrcpParams = SystemConfig.getValue("fs-asr-mrcp-param");
         if(StringUtils.isEmpty(mrcpParams)){
-            logger.error("{} fs-asr-mrcp-param is null, cannot start asr process. {}", uuid);
+            logger.error("{} fs-asr-mrcp-param is null, cannot start asr process.", uuid);
             return;
         }
         logger.info("{} start mrcp detect_speech param: {}", uuid, mrcpParams);
@@ -808,14 +585,14 @@ public abstract class RobotBase implements IEslEventListener {
 
 
     protected void pauseAsr(){
-        if(asrPauseEnabled) {
+        if(asrPauseEnabled && !getAllowInterrupt()) {
             logger.info("{} try to pause Funasr  ", this.uuid);
             EslConnectionUtil.sendExecuteCommand("pause_asr", "1", this.uuid, this.eslConnectionPool);
         }
     }
 
     protected void resumeAsr(){
-        if(asrPauseEnabled) {
+        if(asrPauseEnabled && !getAllowInterrupt()) {
             logger.info("{} try to resume asr  ", this.uuid);
             EslConnectionUtil.sendExecuteCommand("pause_asr", "0", this.uuid, this.eslConnectionPool);
         }

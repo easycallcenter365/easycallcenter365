@@ -24,6 +24,11 @@ public class SysDaoImpl implements SysDao {
 		return mapper.getParamsList();
 	}
 
+	@Override
+	public int updateParam(String paramCode, String paramValue) {
+		return mapper.updateParam(paramCode, paramValue);
+	}
+
 
 	@Override
 	public int setAgentStatus(String opNum, int status) {

@@ -7,7 +7,7 @@ import com.telerobot.fs.config.SystemConfig;
 public class LlmToolRequest {
 
     public static final String TRANSFER_TO_AGENT = "transfer_to_agent";
-
+    public static final String HANGUP = "hangup";
     public static final String KB_QUERY = "kb_query";
 
     private String tool;

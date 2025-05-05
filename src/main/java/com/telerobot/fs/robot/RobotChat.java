@@ -46,6 +46,9 @@ public class RobotChat extends RobotBase {
         logger.info("{} current robot_asr_type={}.",
                 getTraceId(),  this.getAsrModelType()
         );
+        if(getAllowInterrupt() && ASR_TYPE_MRCP.equalsIgnoreCase(this.getAsrModelType())){
+           logger.error("{} `robot-speech-interrupt-allowed=true` parameter is not effective in the mrcp speech recognition mode.", uuid);
+        }
 
         this.callDetail = callDetail;
         this.uuid = callDetail.getUuid();
@@ -57,6 +60,7 @@ public class RobotChat extends RobotBase {
         callDetail.setAnsweredTime(System.currentTimeMillis());
         AcdSqlQueue.addToSqlQueue(callDetail);
         callTaskList.put(uuid, this);
+        createChatBot();
     }
 
     public void startProcess(String uniqueID) {
@@ -138,7 +142,7 @@ public class RobotChat extends RobotBase {
         )) {
            String event = headers.get("Tts-Event-Detail");
            if("Speech-Closed".equalsIgnoreCase(event)){
-               ttsChannelClosed = true;
+               chatRobot.setTtsChannelState(true);
                logger.info("{}  TtsChannelClosed = true.", getTraceId());
            }
         }
@@ -173,6 +177,7 @@ public class RobotChat extends RobotBase {
                     if (!interactiveParam.checkInSpeaking()) {
                         synchronized (getTraceId().intern()) {
                             if (!interactiveParam.checkInSpeaking()) {
+                                interruptRobotSpeech();
                                 // 用户开始讲话标识
                                 interactiveParam.setInSpeaking(true);
                                 // 唤醒主线程，让主线程可以超出6秒限制;
@@ -189,6 +194,7 @@ public class RobotChat extends RobotBase {
                 }
 
                 if (recvPlayBackEndEvent || getAllowInterrupt()) {
+                    logger.info("{} releaseSignal for vad event.", getTraceId());
                     interactiveParam.setInSpeaking(false);
                     releaseSignal();
                 } else {
@@ -198,6 +204,10 @@ public class RobotChat extends RobotBase {
 
             }
         }
+    }
+
+    protected void interruptRobotSpeech(){
+        EslConnectionUtil.sendSyncApiCommand("uuid_break", uuid + " all");
     }
 
     @Override
@@ -327,6 +337,7 @@ public class RobotChat extends RobotBase {
     private void interactWithRobot(String greeting) {
         ThreadLocalTraceId.getInstance().setTraceId(getTraceId());
         interactiveParam.setAllowInterrupt(0);
+        recvPlayBackEndEvent = false;
         // 设置合成录音文件的路径，返回给Robot
         if (asrResultEx.size() == 0 && StringUtils.isEmpty(greeting)) {
             asrResultEx.add("客户没有说话。");
@@ -354,7 +365,7 @@ public class RobotChat extends RobotBase {
         LlmAiphoneRes aiphoneRes;
 
             try {
-                aiphoneRes = talkWithLargeModel(asrStr.toString());
+                aiphoneRes = chatRobot.talkWithAiAgent(asrStr.toString());
                 talkRound.increment();
                 Long spentCost = System.currentTimeMillis() - startTime;
                 logger.info("{}  talkWithLargeModel spent time:  {}  ms, aiphoneRes = {}",
@@ -388,7 +399,7 @@ public class RobotChat extends RobotBase {
                                 callDetail.getGroupId(),
                                 String.valueOf(callDetail.getRemoteVideoPort())
                         );
-                        sendTtsRequest("请稍后，现在为您转接专家坐席。");
+                        chatRobot.sendTtsRequest("请稍后，现在为您转接专家坐席。");
                         acquire(9000);
                         // wait for tips playback finished
 
@@ -398,8 +409,15 @@ public class RobotChat extends RobotBase {
                         return;
                     }
 
+                    if(toolRequest.getTool().equals(LlmToolRequest.HANGUP)) {
+                        chatRobot.sendTtsRequest("欢迎您再次来电咨询，祝您生活愉快，再见!");
+                        acquire(6000);
+                        hangupAndCloseConn();
+                        return;
+                    }
+
                     if(toolRequest.getTool().equals(LlmToolRequest.KB_QUERY)) {
-                        sendTtsRequest("正在为您查询，请稍等。");
+                        chatRobot.sendTtsRequest("正在为您查询，请稍等。");
                         acquire(7000);
                         // wait for tips playback finished
 
@@ -446,7 +464,7 @@ public class RobotChat extends RobotBase {
         }
     }
 
-    private void waitAndDetectSpeaking(long tinyDelay){
+    private void  waitAndDetectSpeaking(long tinyDelay){
         if (isHangup) {
             return;
         }
@@ -472,16 +490,20 @@ public class RobotChat extends RobotBase {
 
         logger.info("{} enter into waitForCustomerSpeak ...", getTraceId());
 
-        // 流式tts播报时间不要超过61秒;
-        acquire(61000);
+        // 流式tts播报时间不要超过181秒;
+        acquire(181000);
         if (isHangup) {
             return;
         }
 
+        if(!recvPlayBackEndEvent) {
+            logger.info("{} robot speech interrupt detected. ", getTraceId());
+        }else{
+            logger.info("{} robot speech playback finished. ", getTraceId());
+        }
+
         if(getAsrModelType().equalsIgnoreCase(ASR_TYPE_WEBSOCKET)) {
-            if(asrPauseEnabled) {
-                resumeAsr();
-            }
+            resumeAsr();
         }
         if (getAsrModelType().equalsIgnoreCase(ASR_TYPE_MRCP)) {
             startMrcp();
@@ -516,7 +538,7 @@ public class RobotChat extends RobotBase {
         if (!isHangup) {
             if (!recvPlayBackEndEvent) {
                 if (getAllowInterrupt()) {
-                    logger.info("{} Detected customer interruption during robot's voice playback,  continue to wait for the customer to complete the speech {} ms",
+                    logger.info("{} Detected customer interruption during robot's speech playback,  continue to wait for the customer to complete the speech {} ms",
                             getTraceId(),
                             interruptWaitMills
                     );
@@ -525,10 +547,7 @@ public class RobotChat extends RobotBase {
                     if (interactiveParam.checkInSpeaking()) {
                         acquire(maxWaitTimeMills);
                     }
-
-                    // 通知停止机器人播放;
                     interruptRobotHappened = true;
-                   // acquire(waitForPlayBackFinished);
                 }
             }
 
@@ -585,7 +604,7 @@ public class RobotChat extends RobotBase {
         callDetail.setExtnum("robot");
         callDetail.setOpnum("robot");
         callDetail.setHangupTime(System.currentTimeMillis());
-        callDetail.setChatContent(getDialogueContent());
+        callDetail.setChatContent(chatRobot.getDialogues());
         long timeLen = System.currentTimeMillis() - callDetail.getAnsweredTime();
         callDetail.setTimeLen(timeLen);
         AcdSqlQueue.addToSqlQueue(callDetail);

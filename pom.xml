@@ -60,8 +60,9 @@
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
-            <version>3.5.0</version>
+            <version>3.14.9</version>
         </dependency>
+
         <dependency>
             <groupId>com.aliyun</groupId>
             <artifactId>aliyun-java-sdk-core</artifactId>
@@ -208,10 +209,12 @@
         </dependency>
 
         <dependency>
-            <groupId>org.java-websocket</groupId>
-            <artifactId>Java-WebSocket</artifactId>
-            <version>1.5.2</version>
+            <groupId>com.coze</groupId>
+            <artifactId>coze-api</artifactId>
+            <version>0.3.1</version>
         </dependency>
+
+
 
     </dependencies>
 

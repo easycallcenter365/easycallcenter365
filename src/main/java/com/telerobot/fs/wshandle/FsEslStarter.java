@@ -2,6 +2,7 @@ package com.telerobot.fs.wshandle;
 
 import com.telerobot.fs.config.AppContextProvider;
 import com.telerobot.fs.config.SystemConfig;
+import com.telerobot.fs.service.SysService;
 import com.telerobot.fs.utils.ThreadUtil;
 import link.thingscloud.freeswitch.esl.EslConnectionPool;
 import org.springframework.context.annotation.DependsOn;
@@ -56,6 +57,12 @@ public class FsEslStarter implements ApplicationListener<ApplicationReadyEvent> 
         nodeInfo.setPoolSize(poolSize);
         nodeList.add(nodeInfo);
         EslConnectionUtil.initConnPool(nodeList);
+
+        // auto update  parameter `server-port` in `cc_params`:
+        // external program can visit `reloadParams` webapi interface via this param.
+        // http://192.168.17.210:8880/call-center/reloadParams
+       AppContextProvider.getBean(SysService.class).updateParam("server-port",
+               AppContextProvider.getEnvConfig("server.port"));
     }
 
     private void checkFreeswitchConnection(){

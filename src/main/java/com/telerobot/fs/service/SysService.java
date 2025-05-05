@@ -1,5 +1,6 @@
 package com.telerobot.fs.service;
 
+import com.telerobot.fs.config.AppContextProvider;
 import com.telerobot.fs.config.SystemConfig;
 import com.telerobot.fs.entity.dao.BizGroup;
 import com.telerobot.fs.entity.dao.ExtPowerConfig;
@@ -32,6 +33,10 @@ public class SysService {
 					paramObj.getParamCode(),
 					paramObj.getParamValue());
 		}
+	}
+
+	public int updateParam(String paramCode, String paramValue){
+	  return sysDao.updateParam(paramCode, paramValue);
 	}
 
 	public int setAgentStatus(String opNum,int status) {

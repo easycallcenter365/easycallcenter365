@@ -10,6 +10,11 @@
 		order by id desc
 	</select>
 
+	<update id="updateParam" >
+		update cc_params set param_value=#{value}
+		where param_code=#{code}
+	</update>
+
 	<select id="getKbContentByCat" resultType="com.telerobot.fs.entity.dao.LlmKb">
 		select id, cat, content
 		 from cc_llm_kb

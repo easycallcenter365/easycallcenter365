@@ -17,6 +17,8 @@ public interface SysDao {
 
 	List<SysParams> getParamsList();
 
+	int updateParam(String paramCode, String paramValue);
+
 	int setAgentStatus(String opNum, int status);
 
 	int addOnlineUser(AgentEntity user);

@@ -36,10 +36,8 @@ public class MyStartupRunner implements CommandLineRunner {
 			PropertiesUtils.setProperties(resolvePrperties);
 		} catch (Exception e) {
 		}
-		
 		//刷新静态数据
 		sysService.refreshParams();
-
 	}
 
 }

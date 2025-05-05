@@ -79,4 +79,6 @@ public interface SysMapper {
 	List<SessionEntity> selectAgentBusyLockTimeout(@Param("expiredTimeMills") long expiredTimeMills);
 
     LlmKb getKbContentByCat(@Param("cat")String cat);
+
+    int updateParam(@Param("code")String paramCode, @Param("value") String paramValue);
 }
