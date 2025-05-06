@@ -20,6 +20,7 @@ import link.thingscloud.freeswitch.esl.constant.EventNames;
 import link.thingscloud.freeswitch.esl.transport.event.EslEvent;
 import link.thingscloud.freeswitch.esl.transport.message.EslMessage;
 import org.apache.commons.lang.StringUtils;
+import sun.plugin.util.UIUtil;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -207,6 +208,7 @@ public class RobotChat extends RobotBase {
     }
 
     protected void interruptRobotSpeech(){
+        logger.info("{} send uuid_break command to FreeSWITCH.", uuid);
         EslConnectionUtil.sendSyncApiCommand("uuid_break", uuid + " all");
     }
 

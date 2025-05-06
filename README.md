@@ -7,17 +7,16 @@
 ### 功能列表
 
 * 支持对接大模型
+* 支持对接 `coze` 智能体
+* 支持对接 `maxKB` 开源知识库
+* 支持AI客服说话时被打断
+* 提供网页管理系统，支持在线配置
 * 实时流式语音合成
 * 支持acd话务排队
 * 支持AI通话无缝转接人工坐席
 * 支持电话工具条
 * 支持IMS视频通话/语音通话转视频
-
-* 支持对接 `coze` 智能体
-* 支持对接 `maxKB` 开源知识库
-* 支持AI客服说话时被打断
-* 提供网页管理系统，支持在线配置
-
+ 
 更新日期: 2025/05/05
 
 ### 技术交流 && 商业咨询
@@ -41,22 +40,18 @@
 * 客户来电时，电话一般进入 public context 的拨号计划，然后在拨号计划中调用 curl 指令，
 curl 请求 easycallcenter365 的一个 api 接口，把通话uuid、主叫被叫等信息发送过去。通话被 easycallcenter365 接管。
 
-* easycallcenter365 启动录音/录像。easycallcenter365 把 faq.txt 作为上下文，附带电话接听的场景提示词，发送给 DeepSeek v3。
-* DeepSeek 以流式http响应的返回开场白，easycallcenter365 一边接收文本，一边调用 speak 指令发送文本进行语音合成。
+* `easycallcenter365` 启动录音/录像。`easycallcenter365` 尝试和`机器人大脑`(deepseek/Coze智能体/MaxKB) 建立连接 。
+* `机器人大脑` 以流式http响应的返回开场白，easycallcenter365 一边接收文本，一边调用 speak 指令发送文本进行语音合成。
 * FreeSWITCH 的 mod_aliyun_tts 收到语音合成指令后，提取参数中的文本，然后连接语音合成服务器，发送语音合成请求。
 * 由于整个过程中，文本是不断产生的，mod_aliyun_tts 一边发送语音合成文本，一边接收合成后的语音流数据，同时进行解码语音并播放。
 * 播放完毕后，FreeSWITCH 启动语音识别的检测。通过 mod_funasr 或者 unimrcp 模块实现语音流的发送及语音识别结果文本的接收。
 * 通过 event socket 消息，FreeSWITCH 把收到的语音识别结果文本，发送给 easycallcenter365。
-* easycallcenter365 把语音识别结果文本，附带前面交互的消息，一起打包，发送给  DeepSeek 。
+* easycallcenter365 把语音识别结果文本，附带前面交互的消息，一起打包，发送给  `机器人大脑` 。
 * 接下来继续循环，直到电话通话结束。
 
 ### 运行环境
 
-   该项目目前仅在 debian-12.5 环境下编译测试通过。其他操作系统环境尚未测试。
-
-### 如何编译 easycallcenter365
-
-参考  [Build.md](Build.md)
+   该项目目前仅在 debian-12.5 环境下编译测试通过。其他操作系统环境尚未测试。 
 
 ### 设置Debian12的中文支持
 
@@ -73,10 +68,17 @@ LANGUAGE=zh_CN.UTF-8
 source ~/.profile
 ```	
 
+### 如何编译`easycallcenter365`
+
+参考  [Build.md](Build.md)
+
+### 编译`easycallcenter365-gui`
+ 
+`easycallcenter365-gui` 是 `easycallcenter365`的可视化管理web界面系统。项目地址及编译参考 [/easycallcenter365/easycallcenter365-gui](/easycallcenter365/easycallcenter365-gui)
+
 ### 编译FreeSWITCH模块
  
-   这里主要是指 流式语音合成 以及 语音识别 模块。
-   参考 https://gitee.com/easycallcenter365/freeswitch-modules-libs 
+这里主要是指 **流式语音合成** 以及 **语音识别** 模块。参考 [/easycallcenter365/freeswitch-modules-libs](/easycallcenter365/freeswitch-modules-libs)
    
 ### 配置FreeSWITCH
 
@@ -102,7 +104,7 @@ source ~/.profile
 
 * 配置测试话机
 
-这里使用分机来模拟呼入电话，如果使用的是项目  https://gitee.com/easycallcenter365/freeswitch-modules-libs  中的配置文件，默认的测试注册端口是5079。
+这里使用分机来模拟呼入电话，如果使用的是项目 [/easycallcenter365/freeswitch-modules-libs](/easycallcenter365/freeswitch-modules-libs) 中的配置文件，默认的测试注册端口是5079。
 完整的话机注册信息如下:
    
   分机号： 你的手机号，比如 13800138000
@@ -118,11 +120,6 @@ source ~/.profile
 * 创建数据库 easycallcenter365
 
   导入sql文件： sql\easycallcenter365.sql
-
-* 修改参数表 cc_params 的参数
-   model-api-key、 model-faq-dir、 robot-asr-type(可选) 
-
-* 拷贝 docs\kb\下的文件到  model-faq-dir
 
 * 启动 nohup java -Dfile.encoding=UTF-8  -jar  easyCallcenter365.jar > /dev/null 2>&1 &
 

@@ -516,7 +516,7 @@ INSERT INTO `cc_params` VALUES ('63', 'FreeSWITCH native部署方式的启动脚
 INSERT INTO `cc_params` VALUES ('64', 'FreeSWITCH 程序根目录', 'fs-root-directory', '/usr/local/freeswitchvideo/', 'sys');
 INSERT INTO `cc_params` VALUES ('65', '服务器对外暴露的IP地址', 'call-center-server-ip-addr', '192.168.1.210', 'sys');
 INSERT INTO `cc_params` VALUES ('66', '呼叫中心电话工具条端口', 'call-center-websocket-port', '1081', 'sys');
-INSERT INTO `cc_params` VALUES ('67', '当前软件的版本; 企业版/社区版  (只读)', 'current-software-version', 'enterprise', 'sys');
+INSERT INTO `cc_params` VALUES ('67', '当前软件的版本; 企业版/社区版  (只读)', 'current-software-version', 'community', 'sys');
 
 -- ----------------------------
 -- Table structure for fs_variables
