@@ -1,0 +1,201 @@
+我们提供了预编译的二进制文件。 百度网盘下载地址: https://pan.baidu.com/s/1xFgMPCu0VKHKnG69QhyTlA 提取码: etv5
+
+注意：部署之前请把百度网盘中的 easyCallcenter365 和 FreeSWITCH 目录下的文件全部下载到本地文件夹。
+然后把他们上传到 linux 服务器目录中，优先推荐使用Debian12.5。
+
+一.  Freeswitch部署
+
+1.  解压缩 FreeSWITCH-for-easycallcenter365-1.10.11.zip
+    注意：如果你是手动编译的FreeSWITCH，请把编译后的文件打包名为: FreeSWITCH-for-easycallcenter365-1.10.11.zip 后再上传到 linux 目录下。
+	在从源代码手动编译的情况下，如果需要docker部署，也需要从前面提到的百度网盘下载docker镜像文件。
+	
+
+2.  创建数据库： freeswitch1011
+    导入  freeswitch-1.10.11.sql
+    注意这里设置数据库root密码为: easycallcenter365
+	
+3. 	导入freeswitch 的docker 镜像
+    docker load -i freeswitch-debian12.5-image.tar
+	
+4.  部署Freeswitch程序
+	mkdir /home/freeswitch/
+	unzip -d /home/freeswitch/  FreeSWITCH-for-easycallcenter365-1.10.11.zip
+	# 注意去掉多余目录，确保Freeswitch的bin目录位于 /home/freeswitch/下;
+	
+	修改Freeswitch的数据库密码:
+	vim /home/freeswitch/etc/freeswitch/autoload_configs/switch.conf.xml
+	（<param name="core-db-dsn" value="mariadb://Server=127.0.0.1;Port=3306;Database=freeswitch;Uid=root;Pwd=easycallcenter365;" />）
+	vim /home/freeswitch/etc/freeswitch/sip_profiles/external.xml
+	（ <param name="odbc-dsn" value="mariadb://Server=127.0.0.1;Port=3306;Database=freeswitch;Uid=root;Pwd=easycallcenter365;" />）
+	vim /home/freeswitch/etc/freeswitch/sip_profiles/internal.xml
+	（ <param name="odbc-dsn" value="mariadb://Server=127.0.0.1;Port=3306;Database=freeswitch;Uid=root;Pwd=easycallcenter365;" />）	
+	
+	请注意：如果你的MySQL和FreeSWITCH不在同一台服务器上，请修改上面的 Server=127.0.0.1 为实际的IP地址。
+	这里的MySQL用户名和密码，如果和你实际设置的不一样， Uid=root;Pwd=easycallcenter365; 请修改为正确的值。
+	
+	
+5. 创建docker容器
+    chmod +x /home/freeswitch/bin/*
+   
+    docker run  --log-opt max-size=100m --log-opt max-file=3  \
+    --ulimit core=-1 --security-opt seccomp=unconfined  --privileged=true  \
+    -itd --name freeswitch-debian12  \
+	-v /home/Records:/home/Records  -v /home/freeswitch:/usr/local/freeswitchvideo  \
+	--network=host  freeswitch-debian12-image   /usr/local/freeswitchvideo/bin/freeswitch_start.sh
+	
+	
+6.  设置容器的时区：  
+	 docker cp /usr/share/zoneinfo/Asia/Shanghai  freeswitch-debian12:/etc/localtime	
+	 
+	 
+7.  进入Freeswitch控制台
+    docker exec -it freeswitch-debian12 /usr/local/freeswitchvideo/bin/fs_cli	 
+	查看状态： sofia status （如果显示数量为0说明安装失败，一般是数据库用户名及密码错误导致）
+	
+
+	
+二. easycallcenter365 的部署
+
+1. 部署 easycallcenter365.jar 
+   
+   a. 在本地文件夹，修改 easycallcenter365.jar 和 easycallcenter365-gui.jar 的配置文件;
+      如果使用的密码是 easycallcenter365 ，则跳过该步骤 b 和 c ;
+  
+   b. easycallcenter365.jar 中默认设置的MySQL的root密码是 easycallcenter365 ;
+      配置文件是：\BOOT-INF\classes\application-uat.properties ;
+	  可以使用Winrar打开jar包，鼠标拖拽拷贝出该文件，修改后再覆盖该文件。
+	  注意：修改jar包时，"压缩方式(C)"，要选择"存储"，否则会导致jar包损坏。
+	  
+   c. easycallcenter365-gui.jar 设置的MySQL的root密码也是 easycallcenter365 ;
+      配置文件是： \BOOT-INF\classes\application-dev.yml
+	  可以参照上一步骤c，使用Winrar打开jar包修改数据库连接密码。
+	  
+   d. 把 easycallcenter365.jar 和 easycallcenter365-gui.jar 文件上传到linux的 /home/call-center/ 目录下;	 
+      mkdir /home/call-center/   
+
+   e. 检查java版本：
+      # java -version
+	  输出	java version "1.8.0_131"
+		    Java(TM) SE Runtime Environment (build 1.8.0_131-b11)
+		    Java HotSpot(TM) 64-Bit Server VM (build 25.131-b11, mixed mode)
+	  如果是OpenJDK，则需要卸载并重新安装 Oracle JDK，参考文章：https://www.cnblogs.com/xuweiqibky/p/15695408.html	
+
+   f. 启动两个jar包程序:
+      cd /home/call-center/
+      nohup  java  -Dfile.encoding=UTF-8  -jar  easycallcenter365.jar > /dev/null 2>&1 & 
+      nohup  java  -Dfile.encoding=UTF-8  -jar  easycallcenter365-gui.jar > /dev/null 2>&1 &
+
+
+三. FunASR的部署
+     
+我们提供了 funasr-server 的一键安装包 funASR-0.1.9
+链接: https://pan.baidu.com/s/1Cg1xUcxrsLMaUv8CklFLug 提取码: 4tke 
+通过funASR官方文档进行安装，有比较大的安装失败概率。
+下载安装包到本地，然后参考网盘中的文档 "FunAsr-0.1.9-集群离线部署.txt" 进行安装。
+
+
+
+四. 运行设置
+
+   这里假定服务器的IP地址是: 192.168.14.210
+
+1. 启动服务
+    docker restart freeswitch-debian12  
+	【如果前面已经启动了 easycallcenter365.jar 和 easycallcenter365-gui.jar ，这里不需要重复启动! 】
+	nohup  java  -Dfile.encoding=UTF-8  -jar  easycallcenter365.jar > /dev/null 2>&1 & 
+    nohup  java  -Dfile.encoding=UTF-8  -jar  easycallcenter365-gui.jar > /dev/null 2>&1 &
+	
+* 注意事项
+
+  启动 easycallcenter365.jar 和  easycallcenter365-gui.jar  之前，请确保FreeSWITCH已经启动，一定注意启动顺序。
+	
+	打开 easycallcenter365 日志:  tail -f /home/call-center/logs/easycallcenter365.log 
+	打开 FreeSWITCH 日志:         tail -f /home/freeswitch/var/log/freeswitch/freeswitch.log
+	进入 FreeSWITCH 控制台：      docker exec -it  freeswitch-debian12  /usr/local/freeswitchvideo/bin/fs_cli
+	
+2.  参数设置
+    登录可视化web管理后台: http://192.168.14.210:8899/
+	用户名: easycallcenter365 密码: easycallcenter365
+	找到菜单: "呼叫管理" -> "参数设置"。
+
+    a. 修改Freeswitch配置文件路径，参数 fs_conf_directory ，填写为实际的值,
+	   比如: /home/freeswitch/etc/freeswitch/ 。
+	   
+	b. 如果是对接"扣子Coze智能体", 请修改 coze-pat-token 和 coze-bot-id	两个参数。
+	   
+	   coze-pat-token 参数请在 https://www.coze.cn/open/oauth/pats 后台创建;
+	   点击右上角的"添加新令牌"，在添加对话框中，过期时间最长可设置为30天，
+	   勾选 "Bot管理" -> "chat"，接着"选择指定工作空间"，最后点击确定保存，
+	   创建成功之后，就可以看到令牌的值，复制它， 注意关闭窗口后无法再次看到。
+	   
+	   coze-bot-id 参数的值如何查看? 
+	   进入扣子主页，https://www.coze.cn/home ，最近编辑 菜单下面，可以看到最近创建的智能体，
+	   选择一个智能体并点击进入，在地址栏中就可以看到， 比如：
+	   https://www.coze.cn/space/7367249902209859647/bot/7447790819148414985
+	   这里的 coze-bot-id 就是 7447790819148414985 。
+	   
+	   特别注意：智能体发布的时候，在发布页面的最下方，一定要勾选 API，否则无法调用智能体接口！
+	
+	c. 如果是对接 MaxKB ，则需要修改三个参数: maxkb-server-url 、maxkb-api-key 、maxkb-model 。
+	   在 MaxKB 后台，点击进入你事先创建好的应用，在 "应用信息" 中找到 "API 访问凭据"， 下方的 "Base URL"，
+	   复制 "Base URL"，在它的值后面追加字符串 /chat/completions，最终完整的示例：
+	   http://222.124.14.142:8081/api/application/abbed614-2313-11f0-b414-0242ac110002/chat/completions
+	   
+    d. 如果是对接 DeepSeekV3，需要修改参数 model-api-key ;
+	   注意，这里我们使用的是阿里云百炼平台的大模型接口: https://bailian.console.aliyun.com/ ，
+	   在右侧菜单：模型体验 -> 文本模型 -> 更多模型，选择 deepseek-v3 ，设置好体验对话框之后，
+	   在右下角可以找到API-Key	 
+	   
+	e. 修改参数 chat-bot-type 
+       可选值：	Coze 、MaxKB 、LlmChat
+	   注意大小写区分，分别对应扣子、MaxKB开源知识库、DeepSeekV3。
+	
+	注意：以上参数修改后，自动生效，无需重启程序。
+	
+	
+3. 修改语音合成设置
+   后台菜单: "语音合成设置" ->  "阿里云tts参数配置"
+   修改三个参数字段: access_key_id、app_key、access_key_secret
+   access_key_id和access_key_secret设置，参考文章： https://blog.csdn.net/weixin_46669218/article/details/138219679
+   app_key的设置，参考文章： https://blog.csdn.net/HaaSTech/article/details/120217461
+   参数修改后，自动生效，无需重启FreeSWITCH程序。
+  
+
+4.  修改语音识别设置
+    easycallcenter365 社区版，默认仅支持 FunAsr 语音识别，无需设置。
+	
+	商业版用户，可以支持把语音识别模块替换为 阿里云 或者科大讯飞。
+	如果选择阿里云语音识别，阿里云后台注意设置语音识别参数，在"项目功能配置"中，找到 "语音识别" -> "修改配置"，
+	商业版语音识别模块支持8K/16K采样率，目前可以支持多种方言及东南亚小语种。
+		   
+	
+5. 下载 "软电话.zip" 安装包，
+   使用软电话之前请先安装vc++运行环境 vcredist_x64_2015-2022.exe。
+   
+   打开软电话注册并测试：
+   分机号及密码： 1001  1234
+   注册地址： 192.168.14.210:5079  (请把 192.168.14.210 改为你自己的虚拟机地址)
+   注册成功后，拨号： 123456789
+   就可以进行智能客服的呼入电话测试了。
+   如果一切正常就可以听到语音播报，如果异常请查看 easycallcenter365.log 以及 FreeSWITCH 日志。
+    
+	
+6. 关于对接 DeepSeekV3 的问题
+   如果参数 chat-bot-type 设置的值为 LlmChat ，此时对接的就是DeepSeekV3。
+   由于DeepSeek官方API速度太慢，这里默认使用的是阿里云百炼平台的大模型接口。
+   如需修改 faq.txt 和提示词，请到服务器  /home/call-center/kb  目录下。
+   
+
+7. 对接智能体注意事项
+   无论是对接Coze还是MaxKB，请先在网页界面的对话窗口中，把文字对话的流程跑通。
+   Coze需要充值，请保持有一定账户余额。
+
+
+8. 其他说明
+   实际投产建议部署在阿里云上。
+   原因如下：
+   a. 语音合成调用的是阿里云，语音播报延时受网络波动影响;
+   b. 语音识别，一般也是使用云端，语音识别结果返回的延时也受到网络波动影响;
+      FunAsr仅限测试使用，语音识别效果比云服务要差，谨慎用于商用；
+   c. 无论是调用扣子Coze智能体还是DeepSeekV3，使用的都是云端大模型，也会受到网络波动影响。
+   

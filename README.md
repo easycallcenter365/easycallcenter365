@@ -25,12 +25,18 @@
 
   ![联系方式](wetchat.png) 
 
-### 是否有一键安装包，可以快速体验该产品?
+### 一键安装包
 
-是的，一键安装体验包的地址在百度网盘。**如需源码编译，请参考后面的编译说明。**
+**从源代码编译，请参考后面的编译说明** 。 一键安装体验包的地址在百度网盘。
 链接: https://pan.baidu.com/s/1ZnQ64KIJWn1p-iJr-b9f4A 提取码: z2qn 
-一键安装包内置了FreeSWITCH-1.10.11、funasr-0.1.9、easycallcenter365.jar、mysql-8。
-下载到本地后，按照目录中的"使用说明.txt" 导入虚拟机并启动，最后调整相关参数即可体验测试。
+一键安装包内置了FreeSWITCH-1.10.11、funasr-0.1.9、easycallcenter365.jar、easycallcenter365-gui.jar、mysql-8。
+下载到本地后，按照目录中的"使用说明.txt" 导入VmWare虚拟机并启动，最后调整相关参数即可体验测试。
+该部署方案可以省去从源代码编译的繁琐步骤，适合用户快速体验产品特性。
+
+### 二进制安装包
+
+我们提供了预编译的二进制文件。 下载地址: https://pan.baidu.com/s/1xFgMPCu0VKHKnG69QhyTlA 提取码: etv5
+部署文档参考目录下的文件 "部署文档.txt"。 该部署方案可以省去从源代码编译的繁琐步骤。
 
 
 ### 呼入电话的处理流程
@@ -74,97 +80,47 @@ source ~/.profile
 
 ### 编译`easycallcenter365-gui`
  
-`easycallcenter365-gui` 是 `easycallcenter365`的可视化管理web界面系统。项目地址及编译参考 [/easycallcenter365/easycallcenter365-gui](/easycallcenter365/easycallcenter365-gui)
+`easycallcenter365-gui` 是 `easycallcenter365`的可视化管理web界面系统。项目地址及编译参考 [/easycallcenter365/easycallcenter365-gui](https://gitee.com/easycallcenter365/easycallcenter365-gui)
 
 ### 编译FreeSWITCH模块
  
-这里主要是指 **流式语音合成** 以及 **语音识别** 模块。参考 [/easycallcenter365/freeswitch-modules-libs](/easycallcenter365/freeswitch-modules-libs)
+这里主要是指 **流式语音合成** 以及 **语音识别** 模块。参考 [/easycallcenter365/freeswitch-modules-libs](https://gitee.com/easycallcenter365/freeswitch-modules-libs)
    
-### 配置FreeSWITCH
+### 详细部署及配置
 
-* 配置拨号计划
-
-在public.xml中加入下面的xml代码，确保插入到文件最前的位置。
-```xml
-<extension name="inbound_call"> 
-	  <condition field="destination_number"  expression="^(\d{7,13})$" >
-		  <action application="set" data="inherit_codec=true"/>
-		  <action application="answer" />
-		  <action application="start_dtmf"/> 
-		  <action application="log" data="INFO inbound call:  ${uuid}  caller=${caller_id_number}, callee=$1 " />
-		  <action application="set" data="continue_on_fail=true"/>
-		  <action application="set" data="hangup_after_bridge=false"/>
-		  <action application="set" data="groupId=1"/>
-		  <action application="set" data="send_silence_when_idle=-1"/>
-		  <action application="curl" data="http://127.0.0.1:8880/call-center/inboundProcessor?remote_video_port=${remote_video_port}&amp;local-media-port=${local_media_port}&amp;uuid=${uuid}&amp;caller=${caller_id_number}&amp;callee=$1&amp;load-test-uuid=${uuid}&amp;group-id=${groupId}"/>
-		  <action application="park" />
-	  </condition>
-</extension>
-```   
-
-* 配置测试话机
-
-这里使用分机来模拟呼入电话，如果使用的是项目 [/easycallcenter365/freeswitch-modules-libs](/easycallcenter365/freeswitch-modules-libs) 中的配置文件，默认的测试注册端口是5079。
-完整的话机注册信息如下:
-   
-  分机号： 你的手机号，比如 13800138000
-  
-  密码: 123456
-  
-  注册地址：虚拟机IP:5079 
-  
-  如果注册超时，请检查FreeSWITCH是否启动。
-
-### 如何配置并运行 easycallcenter365
-
-* 创建数据库 easycallcenter365
-
-  导入sql文件： sql\easycallcenter365.sql
-
-* 启动 nohup java -Dfile.encoding=UTF-8  -jar  easyCallcenter365.jar > /dev/null 2>&1 &
-
-* 查看日志
-
-  tail -f /home/call-center/log/easycallcenter365.log 
-  
-* 拨打测试电话    
-
-  使用上一步注册的话机拨号: 1234567
-  
-  如果一切正常就可以听到语音播报，如果异常请查看 easycallcenter365.log 以及 FreeSWITCH 日志。
-
-* 注意事项
-
-  启动 easycallcenter365.jar 之前，请确保FreeSWITCH已经启动。
-  
-  如果修改了 easycallcenter365.jar 的 server.port，
-  请同步修改 FreeSWITCH拨号计划 public.xml 中的引用。
+参考文件 [Deploy.txt](Deploy.txt)。
 
    
 ### 目前支持哪些语音识别方式?   
 
-  目前支持 websocket、mrcp 语音识别方式。目前 mod_funasr 支持 websocket 方式对接funasr语音识别。 
-  mrcp 语音识别方式，支持阿里云语音识别， 可以参考阿里云官网关于sdm-mrcp-server配置阿里云asr的文档。  
+目前支持 websocket、mrcp 语音识别方式。目前 mod_funasr 支持 websocket 方式对接funasr语音识别。 
+mrcp 语音识别方式，支持阿里云语音识别， 可以参考阿里云官网关于sdm-mrcp-server配置阿里云asr的文档。  
+注意：目前mrcp语音识别方式，无法实现对机器人语音的打断功能。  
+  
 
 ### 如何设置转接到外部网关  
 
 在AI通话中，如果用户明确表达了转人工的诉求，系统会自动转人工坐席。
+登录可视化web管理后台，找到菜单: "呼叫管理" -> "参数设置"。
 
-* 参数表 `cc_params` 的参数 `transfer-to-agent-type` 的值设置为 `gateway`。
+* 参数 `transfer-to-agent-type` 的值设置为 `gateway`。
 
-* 参数表 `cc_params` 的参数 `transfer-to-agent-gateway-number` 的值设置为转人工的号码，比如 15005600327 或者一个固话号码。
+* 参数 `transfer-to-agent-gateway-number` 的值设置为转人工的号码，比如 15005600327 或者一个固话号码。
 
-* 参数表 `cc_params` 的参数 `transfer-to-agent-gateway-info` 设置转人工网关的参数。 比如：
+* 参数 `transfer-to-agent-gateway-info` 设置转人工网关的参数。 比如：
 ```txt
 gatewayAddr=192.168.14.252:5090&caller=64901409&profile=external&calleePrefix=
 ```
 这里解释下，`gatewayAddr` 是网关地址及端口，`caller` 是主叫号码，`profile` 是外呼时的路由profile，`calleePrefix` 是被叫前缀。
+
   
 ### 如何设置转内置人工坐席
 
   在AI通话中，如果用户明确表达了转人工的诉求，系统会自动转人工坐席。
   
-  请把参数表 `cc_params` 的参数 `transfer-to-agent-type` 的值设置为 `acd`。
+  登录可视化web管理后台，找到菜单: "呼叫管理" -> "参数设置"。
+  
+  请把参数 `transfer-to-agent-type` 的值设置为 `acd`。
 
   转人工坐席的流程是，先自动排队，然后转接给空闲坐席处理，坐席需要通过电话工具条登录。  
   
