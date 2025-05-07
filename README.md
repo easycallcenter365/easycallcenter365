@@ -91,7 +91,7 @@ source ~/.profile
    
 ### 详细部署及配置
 
-参考文件 [Deploy.txt](Deploy.txt)。
+参考文件 [Deploy.txt](https://github.com/easycallcenter365/easycallcenter365/blob/master/Deploy.txt)。
 
    
 ### 目前支持哪些语音识别方式?   
