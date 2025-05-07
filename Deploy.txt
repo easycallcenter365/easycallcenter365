@@ -10,7 +10,7 @@
 	在从源代码手动编译的情况下，如果需要docker部署，也需要从前面提到的百度网盘下载docker镜像文件。
 	
 
-2.  创建数据库： freeswitch1011
+2.  创建数据库： freeswitch
     导入  freeswitch-1.10.11.sql
     注意这里设置数据库root密码为: easycallcenter365
 	
@@ -57,6 +57,9 @@
 二. easycallcenter365 的部署
 
 1. 部署 easycallcenter365.jar 
+
+   首先请导入最新的数据库脚本 easycallcenter365.sql。
+   MySQL创建一个名为 easycallcenter365 的数据库，然后导入 easycallcenter365.sql 文件。
    
    a. 在本地文件夹，修改 easycallcenter365.jar 和 easycallcenter365-gui.jar 的配置文件;
       如果使用的密码是 easycallcenter365 ，则跳过该步骤 b 和 c ;
