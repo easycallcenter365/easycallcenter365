@@ -6,19 +6,21 @@
 
 一.  Freeswitch部署
 
-1.  解压缩 FreeSWITCH-for-easycallcenter365-1.10.11.zip
     注意：如果你是手动编译的FreeSWITCH，请把编译后的文件打包名为: FreeSWITCH-for-easycallcenter365-1.10.11.zip 后再上传到 linux 目录下。
-	在从源代码手动编译的情况下，如果需要docker部署，也需要从前面提到的百度网盘下载docker镜像文件。
+	在从源代码手动编译的情况下，如果需要docker部署，也需要从前面提到的百度网盘下载docker镜像文件 freeswitch-debian12.5-image.tar。
 	
+	环境准备：docker及mysql8的安装
+	docker 的安装参考文档: https://gitee.com/easycallcenter365/freeswitch-modules-libs/blob/master/docs/zh-cn/Debian12-install-docker.md 。
+	mysql8 的安装参考文档: https://gitee.com/easycallcenter365/freeswitch-modules-libs/blob/master/docs/zh-cn/Debian12-install-mysql8.md 。
 
-2.  创建数据库： freeswitch
+1.  创建数据库： freeswitch
     导入  freeswitch-1.10.11.sql
     注意这里设置数据库root密码为: easycallcenter365
 	
-3. 	导入freeswitch 的docker 镜像
+2. 	导入freeswitch 的docker 镜像
     docker load -i freeswitch-debian12.5-image.tar
 	
-4.  部署Freeswitch程序
+3.  部署Freeswitch程序
 	mkdir /home/freeswitch/
 	unzip -d /home/freeswitch/  FreeSWITCH-for-easycallcenter365-1.10.11.zip
 	# 注意去掉多余目录，确保Freeswitch的bin目录位于 /home/freeswitch/下;
@@ -35,7 +37,7 @@
 	这里的MySQL用户名和密码，如果和你实际设置的不一样， Uid=root;Pwd=easycallcenter365; 请修改为正确的值。
 	
 	
-5. 创建docker容器
+4. 创建docker容器
     chmod +x /home/freeswitch/bin/*
    
     docker run  --log-opt max-size=100m --log-opt max-file=3  \
@@ -45,11 +47,11 @@
 	--network=host  freeswitch-debian12-image   /usr/local/freeswitchvideo/bin/freeswitch_start.sh
 	
 	
-6.  设置容器的时区：  
+5.  设置容器的时区：  
 	 docker cp /usr/share/zoneinfo/Asia/Shanghai  freeswitch-debian12:/etc/localtime	
 	 
 	 
-7.  进入Freeswitch控制台
+6.  进入Freeswitch控制台
     docker exec -it freeswitch-debian12 /usr/local/freeswitchvideo/bin/fs_cli	 
 	查看状态： sofia status （如果显示数量为0说明安装失败，一般是数据库用户名及密码错误导致）
 	
@@ -71,7 +73,7 @@
 	  注意：修改jar包时，"压缩方式(C)"，要选择"存储"，否则会导致jar包损坏。
 	  
    c. easycallcenter365-gui.jar 设置的MySQL的root密码也是 easycallcenter365 ;
-      配置文件是： \BOOT-INF\classes\application-dev.yml
+      配置文件是： \BOOT-INF\classes\application-pro.yml
 	  可以参照上一步骤c，使用Winrar打开jar包修改数据库连接密码。
 	  
    d. 把 easycallcenter365.jar 和 easycallcenter365-gui.jar 文件上传到linux的 /home/call-center/ 目录下;	 
@@ -82,7 +84,9 @@
 	  输出	java version "1.8.0_131"
 		    Java(TM) SE Runtime Environment (build 1.8.0_131-b11)
 		    Java HotSpot(TM) 64-Bit Server VM (build 25.131-b11, mixed mode)
-	  如果是OpenJDK，则需要卸载并重新安装 Oracle JDK，参考文章：https://www.cnblogs.com/xuweiqibky/p/15695408.html	
+	  如果是OpenJDK，则需要卸载并重新安装 Oracle JDK，
+	  参考文章：https://gitee.com/easycallcenter365/freeswitch-modules-libs/blob/master/docs/zh-cn/debian12-install-jdk8.md
+	  
 
    f. 启动两个jar包程序:
       cd /home/call-center/
@@ -117,10 +121,27 @@
 	打开 FreeSWITCH 日志:         tail -f /home/freeswitch/var/log/freeswitch/freeswitch.log
 	进入 FreeSWITCH 控制台：      docker exec -it  freeswitch-debian12  /usr/local/freeswitchvideo/bin/fs_cli
 	
+* 阿里云主机设置
+
+如果当前部署是在阿里云上，需要在防火墙中设置相关端口开放。	点击主机实例，找到"安全组"，然后点击"管理规则"，在访问规则中，
+手动添加以下端口：
+```txt
+自定义TCP   目的: 8899          源: 所有IPV4(0.0.0.0/0)     描述: easycallcenter365-gui
+自定义TCP   目的: 1081          源: 所有IPV4(0.0.0.0/0)     描述: easycallcenter365电话工具条
+自定义UDP   目的: 20000/30000   源: 所有IPV4(0.0.0.0/0)     描述: easycallcenter365电话语音端口
+自定义UDP   目的: 5080          源: 所有IPV4(0.0.0.0/0)     描述: easycallcenter365电话语音呼入端口
+```
+注意：在阿里云上开放公网端口风险较大，社区版用户需要注意安全风险。建议设置IP来源的地址段。
+(云端部署的安全防护措施仅对商业版用户提供支持。)
+	
+	
 2.  参数设置
     登录可视化web管理后台: http://192.168.14.210:8899/  (这里假定服务器的IP地址是: 192.168.14.210，请修改为实际的IP地址)
 	用户名: easycallcenter365 密码: easycallcenter365
 	找到菜单: "呼叫管理" -> "参数设置"。
+	
+	注意：如果遇到后台界面乱码的情况，请删除 easycallcenter365 数据库，然后重新建立数据库，注意编码设置为：utf8mb4 -- UTF-8 Unicode。
+	建议通过navicat可视化界面导入，并选择正确的编码。
 
     a. 修改Freeswitch配置文件路径，参数 fs_conf_directory ，填写为实际的值,
 	   比如: /home/freeswitch/etc/freeswitch/ 。
