@@ -148,7 +148,14 @@ var groupId = 1; // 业务组id
 ```		
 		
   按照提示修改即可。
-   
+  
+### 传统电话接入后的网络结构图
+
+![传统电话接入后的网络结构图](docs/images/network-tra.png) 
+  
+### 呼叫中心接入后的网络结构图
+
+![传统电话接入后的网络结构图](docs/images/network-callcenter.png) 
 
   
   
