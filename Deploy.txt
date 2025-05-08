@@ -1,6 +1,7 @@
 我们提供了预编译的二进制文件。 百度网盘下载地址: https://pan.baidu.com/s/1xFgMPCu0VKHKnG69QhyTlA 提取码: etv5
 
-注意：部署之前请把百度网盘中的 easyCallcenter365 和 FreeSWITCH 目录下的文件全部下载到本地文件夹。
+
+注意：如果是采用预编译的二进制部署方式， 部署之前请把百度网盘中的 easyCallcenter365 和 FreeSWITCH 目录下的文件全部下载到本地文件夹。
 然后把他们上传到 linux 服务器目录中，优先推荐使用Debian12.5。
 
 一.  Freeswitch部署
@@ -117,7 +118,7 @@
 	进入 FreeSWITCH 控制台：      docker exec -it  freeswitch-debian12  /usr/local/freeswitchvideo/bin/fs_cli
 	
 2.  参数设置
-    登录可视化web管理后台: http://192.168.14.210:8899/
+    登录可视化web管理后台: http://192.168.14.210:8899/  (这里假定服务器的IP地址是: 192.168.14.210，请修改为实际的IP地址)
 	用户名: easycallcenter365 密码: easycallcenter365
 	找到菜单: "呼叫管理" -> "参数设置"。
 
@@ -162,6 +163,10 @@
    access_key_id和access_key_secret设置，参考文章： https://blog.csdn.net/weixin_46669218/article/details/138219679
    app_key的设置，参考文章： https://blog.csdn.net/HaaSTech/article/details/120217461
    参数修改后，自动生效，无需重启FreeSWITCH程序。
+   
+   如何修改TTS语音合成的发音人：
+   后台菜单: "呼叫管理" -> "参数管理"，找到 stream-tts-voice-name ，
+   默认发音人是: aixia ，更新发音人参考阿里云文档: https://help.aliyun.com/zh/isi/developer-reference/overview-of-speech-synthesis
   
 
 4.  修改语音识别设置
@@ -177,10 +182,13 @@
    
    打开软电话注册并测试：
    分机号及密码： 1001  1234
-   注册地址： 192.168.14.210:5079  (请把 192.168.14.210 改为你自己的虚拟机地址)
+   注册地址： 192.168.14.210:5080  (请把 192.168.14.210 改为你自己的虚拟机地址)
    注册成功后，拨号： 123456789
    就可以进行智能客服的呼入电话测试了。
    如果一切正常就可以听到语音播报，如果异常请查看 easycallcenter365.log 以及 FreeSWITCH 日志。
+         
+   注意：如果软电话注册超时，请在服务器端重启FreeSWITCH，30秒后再重启软电话。
+   docker restart  freeswitch-debian12 
     
 	
 6. 关于对接 DeepSeekV3 的问题
