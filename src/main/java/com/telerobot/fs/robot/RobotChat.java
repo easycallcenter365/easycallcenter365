@@ -400,6 +400,7 @@ public class RobotChat extends RobotBase {
                                 callDetail.getGroupId(),
                                 String.valueOf(callDetail.getRemoteVideoPort())
                         );
+                        EslConnectionUtil.sendExecuteCommand("stop_asr", "", uuid);
                         chatRobot.sendTtsRequest("请稍后，现在为您转接专家坐席。");
                         acquire(9000);
                         // wait for tips playback finished
