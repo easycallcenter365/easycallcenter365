@@ -231,3 +231,13 @@
       FunAsr仅限测试使用，语音识别效果比云服务要差，谨慎用于商用；
    c. 无论是调用扣子Coze智能体还是DeepSeekV3，使用的都是云端大模型，也会受到网络波动影响。
    
+
+9. 其他问题汇总
+   a. 如何关闭机器人语音打断功能？
+      参数管理，参数 robot-speech-interrupt-allowed	设置为 false ，参数 asr-pause-enabled 设置为 true 即可。
+
+
+
+
+   
+   
