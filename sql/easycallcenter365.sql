@@ -438,85 +438,86 @@ CREATE TABLE `cc_outbound_cdr` (
 -- ----------------------------
 DROP TABLE IF EXISTS `cc_params`;
 CREATE TABLE `cc_params` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `param_name` varchar(255) NOT NULL DEFAULT '',
   `param_code` varchar(100) NOT NULL,
   `param_value` varchar(2000) NOT NULL DEFAULT '',
   `param_type` varchar(50) NOT NULL DEFAULT '',
+  `hide_value` int(8) NOT NULL DEFAULT '0' COMMENT '是否隐藏显示敏感字段信息',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE KEY `param_code` (`param_code`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=1231315 DEFAULT CHARSET=utf8mb3;
+) ENGINE=MyISAM AUTO_INCREMENT=1231315 DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of cc_params
 -- ----------------------------
-INSERT INTO `cc_params` VALUES ('1', '电话工具条-外呼电话的解密key', 'phone_encrypted_key', '123456', 'phone-bar');
-INSERT INTO `cc_params` VALUES ('2', '录音保存路径', 'recording_path', '/home/Records/', 'phone-bar');
-INSERT INTO `cc_params` VALUES ('3', '是否开启立体音', 'enable_cc_record_stereo', 'false', 'phone-bar');
-INSERT INTO `cc_params` VALUES ('4', '话单推送接口', 'post_cdr_url', 'http://127.0.0.1:8880/call-center/saveCdrTest', 'phone-bar');
-INSERT INTO `cc_params` VALUES ('5', '录音类型', 'recordings_extension', 'wav', 'phone-bar');
-INSERT INTO `cc_params` VALUES ('6', '可用的会议布局', 'conference_video_templates', '480p,720p', 'phone-bar');
-INSERT INTO `cc_params` VALUES ('8', '电话视频会议网关地址', 'conference_gateway_addr', '192.168.67.210:5090', 'sys');
-INSERT INTO `cc_params` VALUES ('9', '视频会议录音/录像保存路径', 'conference_recording_path', '/home/Records/conference/', 'sys');
-INSERT INTO `cc_params` VALUES ('10', '电话视频会议主叫', 'conference_gateway_caller', '055164901409', 'sys');
-INSERT INTO `cc_params` VALUES ('11', '视频清晰度列表', 'video_level_id_list', '42e00b, 42e00c, 42e00d, 42e014, 42e015, 42e016, 42e01e, 42e01f', 'phone-bar');
-INSERT INTO `cc_params` VALUES ('12', '电话视频会议外呼的profile', 'conference_outboud_profile', 'external', 'sys');
-INSERT INTO `cc_params` VALUES ('7', '电话视频会议的布局列表', 'conference_video_layouts', '2x2, 3x3, 1up_top_left+3', 'sys');
-INSERT INTO `cc_params` VALUES ('13', '转人工方式; gateway/acd', 'transfer-to-agent-type', 'gateway', 'phone-bar');
-INSERT INTO `cc_params` VALUES ('52', '对话机器人类型; 大模型(LlmChat)/扣子智能体(Coze)', 'chat-bot-type', 'Coze', 'sys');
-INSERT INTO `cc_params` VALUES ('14', '转人工; 转接到外部网关的号码', 'transfer-to-agent-gateway-number', '15005600328', 'phone-bar');
-INSERT INTO `cc_params` VALUES ('15', '转人工; 转接到外部网关的配置', 'transfer-to-agent-gateway-info', 'gatewayAddr=192.168.14.252:5090&caller=64901409&profile=external&calleePrefix=', 'phone-bar');
-INSERT INTO `cc_params` VALUES ('16', '是否启用通话监听', 'call_monitor_enabled', 'true', 'sys');
-INSERT INTO `cc_params` VALUES ('17', 'FreeSWITCH日志路径', 'fs_log_file_path', '/home/freeswitch/var/log/freeswitch/freeswitch.log', 'sys');
-INSERT INTO `cc_params` VALUES ('18', 'call-center日志路径', 'cc_log_file_path', '/home/call-center/logs/easycallcenter365.log', 'sys');
-INSERT INTO `cc_params` VALUES ('19', '是否启动双向asr语音识别并推送结果', 'fs_call_asr_enabled', 'false', 'sys');
-INSERT INTO `cc_params` VALUES ('20', '是否启用呼入电话排队监控', 'inbound_call_monitor_enabled', 'true', 'sys');
-INSERT INTO `cc_params` VALUES ('21', 'Freeswitch的docker容器名称', 'fs_docker_container_name', 'freeswitch-debian12', 'sys');
-INSERT INTO `cc_params` VALUES ('22', 'Freeswitch配置文件路径', 'fs_conf_directory', '/home/freeswitch/etc/freeswitch/', 'sys');
-INSERT INTO `cc_params` VALUES ('23', '大模型底座的 Api-key', 'model-api-key', 'YOUR model-api-key', 'sys');
-INSERT INTO `cc_params` VALUES ('24', '大模型底座的 地址', 'model-url', 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions', 'sys');
-INSERT INTO `cc_params` VALUES ('25', '大模型底座的 名字', 'model-name', 'deepseek-v3', 'sys');
-INSERT INTO `cc_params` VALUES ('26', '语音识别类型; mrcp、websocket', 'robot-asr-type', 'websocket', 'sys');
-INSERT INTO `cc_params` VALUES ('28', 'mrcp 语音识别请求参数', 'fs-asr-mrcp-param', 'unimrcp:aliyun hello hello', 'sys');
-INSERT INTO `cc_params` VALUES ('29', '机器人通话中，最大客户静默时长; 客户超时不讲话通话会被自动掐断', 'robot-max-no-speak-time', '300', 'sys');
-INSERT INTO `cc_params` VALUES ('30', '呼入通话最大并发数限制', 'max-call-concurrency', '100', 'sys');
-INSERT INTO `cc_params` VALUES ('31', 'asr按需识别，仅在机器话术播报完毕后才启动', 'asr-pause-enabled', 'false', 'sys');
-INSERT INTO `cc_params` VALUES ('32', '检测到客户说话开始后，等待说话结束的最大时长;秒', 'max-wait-time-after-vad-start', '15', 'sys');
-INSERT INTO `cc_params` VALUES ('33', '优先启用机器人接听电话', 'ai-answer-call-first', 'true', 'sys');
-INSERT INTO `cc_params` VALUES ('34', '呼入电话转接坐席超时时间; 秒', 'inbound-transfer-agent-timeout', '30', 'sys');
-INSERT INTO `cc_params` VALUES ('35', '转接到坐席时，隐藏呼入号码', 'hide-inbound-number', 'true', 'sys');
-INSERT INTO `cc_params` VALUES ('36', '转接到坐席时，是否播报工号', 'inbound-play-opnum', 'true', 'sys');
-INSERT INTO `cc_params` VALUES ('37', 'event socket ip address', 'event-socket-ip', '127.0.0.1', 'sys');
-INSERT INTO `cc_params` VALUES ('38', 'event socket port', 'event-socket-port', '8021', 'sys');
-INSERT INTO `cc_params` VALUES ('39', 'event socket password', 'event-socket-pass', 'ClueCon', 'sys');
-INSERT INTO `cc_params` VALUES ('40', 'event socket connection pool size', 'event-socket-conn-pool-size', '10', 'sys');
-INSERT INTO `cc_params` VALUES ('41', '最大坐席人数', 'max-agent-number', '100', 'sys');
-INSERT INTO `cc_params` VALUES ('42', '解密并验证token的Key', 'ws-server-auth-token-secret', 'TeleRobot2048AbDfF@#!', 'sys');
-INSERT INTO `cc_params` VALUES ('43', '(websocket server) 电话工具条端口', 'ws-server-port', '1081', 'sys');
-INSERT INTO `cc_params` VALUES ('44', '是否开启vad智能等待', 'vad-intelligent-wait', 'false', 'sys');
-INSERT INTO `cc_params` VALUES ('45', 'vad智能等待的毫秒数', 'vad-intelligent-wait-ms', '600', 'sys');
-INSERT INTO `cc_params` VALUES ('46', '流式tts提供者名字', 'stream-tts-voice-source', 'aliyuntts', 'sys');
-INSERT INTO `cc_params` VALUES ('47', '流式tts发音人', 'stream-tts-voice-name', 'aixia', 'sys');
-INSERT INTO `cc_params` VALUES ('27', '知识库faq文档目录', 'model-faq-dir', '/home/call-center/kb/', 'sys');
-INSERT INTO `cc_params` VALUES ('48', '智能体 coze-server-url', 'coze-server-url', 'https://api.coze.cn/v3/chat', 'sys');
-INSERT INTO `cc_params` VALUES ('49', '智能体 coze-pat-token', 'coze-pat-token', 'Your token string...', 'sys');
-INSERT INTO `cc_params` VALUES ('50', '智能体 coze-bot-id', 'coze-bot-id', '7447790819148414***', 'sys');
-INSERT INTO `cc_params` VALUES ('51', '自定义对话接口地址', 'custom-robot-server-url', 'https://oa.qianzhoukj.com/chat.php', 'sys');
-INSERT INTO `cc_params` VALUES ('53', 'COZE OAUTH 认证模式下的 CLIENT_ID', 'coze_jwt_oauth_client_id', '1182131784***', 'sys');
-INSERT INTO `cc_params` VALUES ('54', 'COZE OAUTH 认证模式下的 私钥', 'coze_jwt_oauth_private_key', '-----BEGIN PRIVATE KEY-----\r\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQCW2PEhI4xw6i37\r\n6NXf/rtmtLY+zkgqUTeEXbpG8y3Aa7k74ih2M7k1J2SHoSr30xZELtpQ05tmsgsa\r\nlYAfDfxgaXE3ywJiGE42Hb6G3xvplMSHk6FbFzDBcWD6WB3CWLsC0PFSqinbIMJ9\r\nQls6cpDvyncrcp2mWC7N/46lNNmyERudSvs2BoUeNVUn+6Ti/WNK9fMG4/YmxFx5\r\nRhxc+NoOfIVASx0qlZ4WWWawk9G2Gb/vFQcnIl3SGVLRO6G8f/zumdJBFstR9XK6\r\nsnSm3dROU3w9PiUkODLvr4c4l01RdUSih7E9byjteuUT9JE7SzHN1xsxwZBkmXwe\r\nRzDOawt9AgMBAAECggEAAVef2arOep4S162BjbM0vrFiom9vzp9CDmBOd919GDu9\r\nKQ5roWr3aG+Cd6nUTzfmeFKEaHi25snfIGxDzhhFQ88HDgyKkmM4pZxL0DkXBKk+\r\nux1yBPSmtJSfh3Vrml7zbGR96T2QuXLyrW5UOn0U02q/9w0s4EiOQ2X/7Ry/HSms\r\npRdIA5H0nq/4gOsuuUMNFZp/qVK5LNOjcLBrPjrb0Ph0NtYcYC9yC3NpRpDkelCd\r\nPR03QV3R8UcBbWAqaJJ8IakRx+kSLoI7wa0JDnYBoVEdlMd+rE+usjYU/FIWRdJz\r\nlQ4+ZBMnwW/sgrooNg6AHB7kBcMD2H4qoAEwWKPU6+9MixjdE9IzSzL/GQKBgQCg\r\nBka+sIVkjrLo4eyHqhPYWNgxyj1tHjUV/qwJ7gtrCW5mDuvdYlBEzK0/cj7jlkmW\r\nOJtgitHCvGhUNRAc512coGpr7bS9a6tpq9BsErZvYMfhbMTQi5Lok/djPhtIcnYZ\r\n7ZW47pFk3xWAslehnLiy492LSHTxAIKOOf33dTEOdQKBgQCGWz8kdz2pbSkDT36s\r\n4gyER48rxMECh0keIfKr+2JUInH0geXq2+ul0uasdPnZVvRPJQ5zWAFyRfh+w3zH\r\nR+KmsMFLcrChYDtVcw4XWeoisP97d7cUF1EdWP+tcU2MAUCSJDPMCB2pwyBgANg+\r\nCSDaqops6Vf8No4AXC0GkGLAUg==\r\n-----END PRIVATE KEY-----', 'sys');
-INSERT INTO `cc_params` VALUES ('55', 'COZE OAUTH 认证模式下的 公钥指纹', 'coze_jwt_oauth_public_key_id', 'n4BuIv2p2T-GurWev-Px_-FPfeJHkEJ-********', 'sys');
-INSERT INTO `cc_params` VALUES ('56', 'COZE_TOKEN_TYPE 可选值 oauth/pat', 'coze_token_type', 'pat', 'sys');
-INSERT INTO `cc_params` VALUES ('57', 'MaxKB 的访问url', 'maxkb-server-url', 'http://222.134.154.142:8081/api/application/abbed614-2313-11f0-b414-0242ac110002/chat/completions', 'sys');
-INSERT INTO `cc_params` VALUES ('58', 'MaxKB 的 API-Key', 'maxkb-api-key', 'application-bc3e285bd4a9c33f0af23ea**29c1234x', 'sys');
-INSERT INTO `cc_params` VALUES ('59', 'MaxKB 的 model', 'maxkb-model', 'gemma3:12b', 'sys');
-INSERT INTO `cc_params` VALUES ('60', '机器人语音播报允许被打断', 'robot-speech-interrupt-allowed', 'true', 'sys');
-INSERT INTO `cc_params` VALUES ('61', '呼叫中心WebAPI的 server-port (只读)', 'call-center-server-port', '8880', 'sys');
-INSERT INTO `cc_params` VALUES ('62', 'FreeSWITCH 部署方式; docker/native', 'fs-deploy-type', 'docker', 'sys');
-INSERT INTO `cc_params` VALUES ('63', 'FreeSWITCH native部署方式的启动脚本路径', 'fs-deploy-native-start-up-script', '/usr/local/freeswitchvideo/bin/freeswitch.sh', 'sys');
-INSERT INTO `cc_params` VALUES ('64', 'FreeSWITCH 程序根目录', 'fs-root-directory', '/usr/local/freeswitchvideo/', 'sys');
-INSERT INTO `cc_params` VALUES ('65', '服务器对外暴露的IP地址', 'call-center-server-ip-addr', '192.168.1.210', 'sys');
-INSERT INTO `cc_params` VALUES ('66', '呼叫中心电话工具条端口', 'call-center-websocket-port', '1081', 'sys');
-INSERT INTO `cc_params` VALUES ('67', '当前软件的版本; 企业版/社区版  (只读)', 'current-software-version', 'community', 'sys');
+INSERT INTO `cc_params` VALUES ('1', '电话工具条-外呼电话的解密key', 'phone_encrypted_key', '123456', 'phone-bar', '0');
+INSERT INTO `cc_params` VALUES ('2', '录音保存路径', 'recording_path', '/home/Records/', 'phone-bar', '0');
+INSERT INTO `cc_params` VALUES ('3', '是否开启立体音', 'enable_cc_record_stereo', 'false', 'phone-bar', '0');
+INSERT INTO `cc_params` VALUES ('4', '话单推送接口', 'post_cdr_url', 'http://127.0.0.1:8880/call-center/saveCdrTest', 'phone-bar', '0');
+INSERT INTO `cc_params` VALUES ('5', '录音类型', 'recordings_extension', 'wav', 'phone-bar', '0');
+INSERT INTO `cc_params` VALUES ('6', '可用的会议布局', 'conference_video_templates', '480p,720p', 'phone-bar', '0');
+INSERT INTO `cc_params` VALUES ('8', '电话视频会议网关地址', 'conference_gateway_addr', '192.168.67.210:5090', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('9', '视频会议录音/录像保存路径', 'conference_recording_path', '/home/Records/conference/', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('10', '电话视频会议主叫', 'conference_gateway_caller', '055164901409', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('11', '视频清晰度列表', 'video_level_id_list', '42e00b, 42e00c, 42e00d, 42e014, 42e015, 42e016, 42e01e, 42e01f', 'phone-bar', '0');
+INSERT INTO `cc_params` VALUES ('12', '电话视频会议外呼的profile', 'conference_outboud_profile', 'external', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('7', '电话视频会议的布局列表', 'conference_video_layouts', '2x2, 3x3, 1up_top_left+3', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('13', '转人工方式; gateway/acd', 'transfer-to-agent-type', 'gateway', 'phone-bar', '0');
+INSERT INTO `cc_params` VALUES ('52', '对话机器人类型; 大模型(LlmChat)/扣子智能体(Coze)', 'chat-bot-type', 'Coze', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('14', '转人工; 转接到外部网关的号码', 'transfer-to-agent-gateway-number', '15005600328', 'phone-bar', '0');
+INSERT INTO `cc_params` VALUES ('15', '转人工; 转接到外部网关的配置', 'transfer-to-agent-gateway-info', 'gatewayAddr=192.168.14.252:5090&caller=64901409&profile=external&calleePrefix=', 'phone-bar', '0');
+INSERT INTO `cc_params` VALUES ('16', '是否启用通话监听', 'call_monitor_enabled', 'true', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('17', 'FreeSWITCH日志路径', 'fs_log_file_path', '/home/freeswitch/var/log/freeswitch/freeswitch.log', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('18', 'call-center日志路径', 'cc_log_file_path', '/home/call-center/logs/easycallcenter365.log', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('19', '是否启动双向asr语音识别并推送结果', 'fs_call_asr_enabled', 'false', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('20', '是否启用呼入电话排队监控', 'inbound_call_monitor_enabled', 'true', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('21', 'Freeswitch的docker容器名称', 'fs_docker_container_name', 'freeswitch-debian12', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('22', 'Freeswitch配置文件路径', 'fs_conf_directory', 'D:/Program Files/FreeSWITCH/conf2/', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('23', '大模型底座的 Api-key', 'model-api-key', 'YOUR model-api-key', 'sys', '1');
+INSERT INTO `cc_params` VALUES ('24', '大模型底座的 地址', 'model-url', 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('25', '大模型底座的 名字', 'model-name', 'deepseek-v3', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('26', '语音识别类型; mrcp、websocket', 'robot-asr-type', 'websocket', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('28', 'mrcp 语音识别请求参数', 'fs-asr-mrcp-param', 'unimrcp:aliyun hello hello', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('29', '机器人通话中，最大客户静默时长; 客户超时不讲话通话会被自动掐断', 'robot-max-no-speak-time', '300', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('30', '呼入通话最大并发数限制', 'max-call-concurrency', '100', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('31', 'asr按需识别，仅在机器话术播报完毕后才启动', 'asr-pause-enabled', 'false', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('32', '检测到客户说话开始后，等待说话结束的最大时长;秒', 'max-wait-time-after-vad-start', '15', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('33', '优先启用机器人接听电话', 'ai-answer-call-first', 'true', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('34', '呼入电话转接坐席超时时间; 秒', 'inbound-transfer-agent-timeout', '30', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('35', '转接到坐席时，隐藏呼入号码', 'hide-inbound-number', 'true', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('36', '转接到坐席时，是否播报工号', 'inbound-play-opnum', 'true', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('37', 'event socket ip address', 'event-socket-ip', '127.0.0.1', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('38', 'event socket port', 'event-socket-port', '8021', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('39', 'event socket password', 'event-socket-pass', 'ClueCon', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('40', 'event socket connection pool size', 'event-socket-conn-pool-size', '10', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('41', '最大坐席人数', 'max-agent-number', '100', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('42', '解密并验证token的Key', 'ws-server-auth-token-secret', 'TeleRobot2048AbDfF@#!', 'sys', '1');
+INSERT INTO `cc_params` VALUES ('43', '(websocket server) 电话工具条端口', 'ws-server-port', '1081', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('44', '是否开启vad智能等待', 'vad-intelligent-wait', 'false', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('45', 'vad智能等待的毫秒数', 'vad-intelligent-wait-ms', '600', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('46', '流式tts提供者名字', 'stream-tts-voice-source', 'aliyuntts', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('47', '流式tts发音人', 'stream-tts-voice-name', 'aixia', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('27', '知识库faq文档目录', 'model-faq-dir', '/home/call-center/kb/', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('48', '智能体 coze-server-url', 'coze-server-url', 'https://api.coze.cn/v3/chat', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('49', '智能体 coze-pat-token', 'coze-pat-token', 'pat token string.....', 'sys', '1');
+INSERT INTO `cc_params` VALUES ('50', '智能体 coze-bot-id', 'coze-bot-id', '7447790819148414***', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('51', '自定义对话接口地址', 'custom-robot-server-url', 'https://oa.test.com/chat.php', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('53', 'COZE OAUTH 认证模式下的 CLIENT_ID', 'coze_jwt_oauth_client_id', '1182131784***', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('54', 'COZE OAUTH 认证模式下的 私钥', 'coze_jwt_oauth_private_key', '-----BEGIN PRIVATE KEY-----\r\nMIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQCW2PEhI4xw6i37\r\n6NXf/rtmtLY+zkgqUTeEXbpG8y3Aa7k74ih2M7k1J2SHoSr30xZELtpQ05tmsgsa\r\nlYAfDfxgaXE3ywJiGE42Hb6G3xvplMSHk6FbFzDBcWD6WB3CWLsC0PFSqinbIMJ9\r\nQls6cpDvyncrcp2mWC7N/46lNNmyERudSvs2BoUeNVUn+6Ti/WNK9fMG4/YmxFx5\r\nRhxc+NoOfIVASx0qlZ4WWWawk9G2Gb/vFQcnIl3SGVLRO6G8f/zumdJBFstR9XK6\r\nsnSm3dROU3w9PiUkODLvr4c4l01RdUSih7E9byjteuUT9JE7SzHN1xsxwZBkmXwe\r\nRzDOawt9AgMBAAECggEAAVef2arOep4S162BjbM0vrFiom9vzp9CDmBOd919GDu9\r\nKQ5roWr3aG+Cd6nUTzfmeFKEaHi25snfIGxDzhhFQ88HDgyKkmM4pZxL0DkXBKk+\r\nux1yBPSmtJSfh3Vrml7zbGR96T2QuXLyrW5UOn0U02q/9w0s4EiOQ2X/7Ry/HSms\r\npRdIA5H0nq/4gOsuuUMNFZp/qVK5LNOjcLBrPjrb0Ph0NtYcYC9yC3NpRpDkelCd\r\nPR03QV3R8UcBbWAqaJJ8IakRx+kSLoI7wa0JDnYBoVEdlMd+rE+usjYU/FIWRdJz\r\nlQ4+ZBMnwW/sgrooNg6AHB7kBcMD2H4qoAEwWKPU6+9MixjdE9IzSzL/GQKBgQCg\r\nBka+sIVkjrLo4eyHqhPYWNgxyj1tHjUV/qwJ7gtrCW5mDuvdYlBEzK0/cj7jlkmW\r\nOJtgitHCvGhUNRAc512coGpr7bS9a6tpq9BsErZvYMfhbMTQi5Lok/djPhtIcnYZ\r\n7ZW47pFk3xWAslehnLiy492LSHTxAIKOOf33dTEOdQKBgQCGWz8kdz2pbSkDT36s\r\n4gyER48rxMECh0keIfKr+2JUInH0geXq2+ul0uasdPnZVvRPJQ5zWAFyRfh+w3zH\r\nR+KmsMFLcrChYDtVcw4XWeoisP97d7cUF1EdWP+tcU2MAUCSJDPMCB2pwyBgANg+\r\nCSDaqops6Vf8No4AXC0GkGLAUg==\r\n-----END PRIVATE KEY-----', 'sys', '1');
+INSERT INTO `cc_params` VALUES ('55', 'COZE OAUTH 认证模式下的 公钥指纹', 'coze_jwt_oauth_public_key_id', 'n4BuIv2p2T-GurWev-Px_-FPfeJHkEJ-********', 'sys', '1');
+INSERT INTO `cc_params` VALUES ('56', 'COZE_TOKEN_TYPE 可选值 oauth/pat', 'coze_token_type', 'pat', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('57', 'MaxKB 的访问url', 'maxkb-server-url', 'http://222.134.154.142:8081/api/application/abbed614-2313-11f0-b414-0242ac110002/chat/completions', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('58', 'MaxKB 的 API-Key', 'maxkb-api-key', 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', 'sys', '1');
+INSERT INTO `cc_params` VALUES ('59', 'MaxKB 的 model', 'maxkb-model', 'gemma3:12b', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('60', '机器人语音播报允许被打断', 'robot-speech-interrupt-allowed', 'true', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('61', '呼叫中心WebAPI的 server-port (只读)', 'call-center-server-port', '8880', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('62', 'FreeSWITCH 部署方式; docker/native', 'fs-deploy-type', 'docker', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('63', 'FreeSWITCH native部署方式的启动脚本路径', 'fs-deploy-native-start-up-script', '/usr/local/freeswitchvideo/bin/freeswitch.sh', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('64', 'FreeSWITCH 程序根目录', 'fs-root-directory', '/usr/local/freeswitchvideo/', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('65', '服务器对外暴露的IP地址', 'call-center-server-ip-addr', '192.168.1.210', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('66', '呼叫中心电话工具条端口', 'call-center-websocket-port', '1081', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('67', '当前软件的版本; 企业版/社区版  (只读)', 'current-software-version', 'community', 'sys', '0');
 
 -- ----------------------------
 -- Table structure for fs_variables
