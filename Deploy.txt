@@ -236,7 +236,10 @@
    a. 如何关闭机器人语音打断功能？
       参数管理，参数 robot-speech-interrupt-allowed	设置为 false ，参数 asr-pause-enabled 设置为 true 即可。
 
-
+   b. 关于电话工具条的设置问题
+      如果是想把工具条代码集成到自己的业务系统中，请参考easycallcenter365项目主页文档： https://gitee.com/easycallcenter365/easycallcenter365#%E5%A6%82%E4%BD%95%E8%AE%BE%E7%BD%AE%E8%BD%AC%E5%86%85%E7%BD%AE%E4%BA%BA%E5%B7%A5%E5%9D%90%E5%B8%AD
+      如果是想测试 easycallcenter365-gui 管理后台的电话工具条，在管理后台找到，参数管理，修改参数: call-center-server-ip-addr ，改为当前服务器的对外IP地址即可。
+	  
 
 
    
