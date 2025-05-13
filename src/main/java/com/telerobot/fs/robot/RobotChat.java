@@ -400,9 +400,11 @@ public class RobotChat extends RobotBase {
                                 callDetail.getGroupId(),
                                 String.valueOf(callDetail.getRemoteVideoPort())
                         );
-                        EslConnectionUtil.sendExecuteCommand("stop_asr", "", uuid);
+                        logger.info("{} stop_asr process.", uuid);
                         chatRobot.sendTtsRequest("请稍后，现在为您转接专家坐席。");
-                        acquire(9000);
+                        // stop_asr 的顺序很重要，需要放在播放tts之后，否则不起作用；会被uuid_break清空指令;
+                        EslConnectionUtil.sendExecuteCommand("stop_asr", "", uuid);
+                        acquire(5000);
                         // wait for tips playback finished
 
                         this.processFsMsg(this.generateHangupEvent("transferToAgent"));

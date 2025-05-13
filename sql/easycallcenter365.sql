@@ -242,7 +242,7 @@ INSERT INTO `cc_ext_num` VALUES ('44', '1000', '123456', '1000');
 DROP TABLE IF EXISTS `cc_ext_power`;
 CREATE TABLE `cc_ext_power` (
   `power_id` int NOT NULL AUTO_INCREMENT,
-  `ext_num` varchar(10) NOT NULL COMMENT '分机号',
+  `ext_num` varchar(50) NOT NULL COMMENT '分机号',
   `group_id` varchar(2000) NOT NULL DEFAULT '0' COMMENT '业务组id; 如果为0，则可以监控全部通话; 多个以逗号,分隔',
   PRIMARY KEY (`power_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='该表定义了分机权限。可以管理哪些业务组的分机，比如监听、语音指导、im消息等。';
