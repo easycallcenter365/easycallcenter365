@@ -1,16 +1,16 @@
 /*
 Navicat MySQL Data Transfer
 
-Source Server         : 192.168.1.210
+Source Server         : 192.168.17.210
 Source Server Version : 80029
-Source Host           : 192.168.1.210:3306
+Source Host           : 192.168.17.210:3306
 Source Database       : easycallcenter365
 
 Target Server Type    : MYSQL
 Target Server Version : 80029
 File Encoding         : 65001
 
-Date: 2025-05-05 22:24:51
+Date: 2025-05-19 19:09:17
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -58,6 +58,41 @@ INSERT INTO `cc_biz_group` VALUES ('1', '金牌客服组', '2', '金牌', null);
 INSERT INTO `cc_biz_group` VALUES ('2', '银牌客服组', '3', '', null);
 INSERT INTO `cc_biz_group` VALUES ('3', '测试业务组', '3', '3', null);
 INSERT INTO `cc_biz_group` VALUES ('4', '默认组', '1', '缺省值', null);
+
+-- ----------------------------
+-- Table structure for cc_call_voice_notification
+-- ----------------------------
+DROP TABLE IF EXISTS `cc_call_voice_notification`;
+CREATE TABLE `cc_call_voice_notification` (
+  `id` varchar(32) NOT NULL,
+  `telephone` varchar(50) NOT NULL,
+  `createtime` bigint NOT NULL DEFAULT '0' COMMENT '任务创建时间',
+  `callstatus` smallint NOT NULL DEFAULT '1' COMMENT '1  已经进入呼叫队列;  2 正在呼叫;  3  未接通;  4   已接通; 5 语音文件不存在',
+  `callout_time` bigint NOT NULL DEFAULT '0' COMMENT '外呼时间',
+  `callcount` smallint NOT NULL DEFAULT '0' COMMENT '呼叫次数',
+  `call_end_time` bigint NOT NULL DEFAULT '0' COMMENT '呼叫结束时间',
+  `time_len` int NOT NULL DEFAULT '0' COMMENT '通话时长; 秒;',
+  `valid_time_len` int NOT NULL DEFAULT '0' COMMENT '有效通话时长; 秒',
+  `uuid` varchar(50) NOT NULL DEFAULT '' COMMENT '通话唯一标志',
+  `connected_time` bigint NOT NULL DEFAULT '0' COMMENT '通话接通时间',
+  `hangup_cause` varchar(50) NOT NULL DEFAULT '' COMMENT '挂机原因',
+  `dialogue` text COMMENT '对话内容',
+  `recordings_file` varchar(200) NOT NULL DEFAULT '' COMMENT '全程通话录音文件名',
+  `gateway_id` int NOT NULL DEFAULT '0' COMMENT '使用哪条线路外呼; ',
+  `gateway_name` varchar(50) NOT NULL DEFAULT '' COMMENT '外呼使用的网关名称; gateway_id为0时，才启用该参数;',
+  `voice_file_save_path` varchar(1024) NOT NULL DEFAULT '' COMMENT '录音通知文件的本地路径',
+  `voice_file_url` varchar(1024) NOT NULL DEFAULT '' COMMENT '录音通知文件的原始url地址',
+  `batch_id` varchar(32) NOT NULL DEFAULT '' COMMENT '批次id',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id` (`id`) USING BTREE,
+  KEY `telephone` (`telephone`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COMMENT='外呼号码表';
+
+-- ----------------------------
+-- Records of cc_call_voice_notification
+-- ----------------------------
+INSERT INTO `cc_call_voice_notification` VALUES ('2505142154420110002', '15005600327', '1747230882369', '4', '1747230882628', '1', '1747230893763', '10', '10', '2505142154420110005', '1747230883193', 'NORMAL_CLEARING:null', null, '/voice-notification/2025/05/14/21/2505142154420110005.wav', '0', 'MRWG', 'C:/home/Records/voice_files/2025-05-14/2505142154420110004.wav', 'http://127.0.0.1:8890/speechtest.wav', '2505142154420110001');
+INSERT INTO `cc_call_voice_notification` VALUES ('2505142154420110003', '15005600328', '1747230882369', '4', '1747230898439', '1', '1747230909273', '10', '10', '2505142154580110002', '1747230898713', 'NORMAL_CLEARING:null', null, '/voice-notification/2025/05/14/21/2505142154580110002.wav', '0', 'MRWG', 'C:/home/Records/voice_files/2025-05-14/2505142154580110001.wav', 'http://127.0.0.1:8890/speechtest.wav', '2505142154420110001');
 
 -- ----------------------------
 -- Table structure for cc_conference_list
@@ -242,7 +277,7 @@ INSERT INTO `cc_ext_num` VALUES ('44', '1000', '123456', '1000');
 DROP TABLE IF EXISTS `cc_ext_power`;
 CREATE TABLE `cc_ext_power` (
   `power_id` int NOT NULL AUTO_INCREMENT,
-  `ext_num` varchar(50) NOT NULL COMMENT '分机号',
+  `ext_num` varchar(10) NOT NULL COMMENT '分机号',
   `group_id` varchar(2000) NOT NULL DEFAULT '0' COMMENT '业务组id; 如果为0，则可以监控全部通话; 多个以逗号,分隔',
   PRIMARY KEY (`power_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='该表定义了分机权限。可以管理哪些业务组的分机，比如监听、语音指导、im消息等。';
@@ -344,7 +379,7 @@ CREATE TABLE `cc_gateways` (
 -- ----------------------------
 -- Records of cc_gateways
 -- ----------------------------
-INSERT INTO `cc_gateways` VALUES ('9', 'outbound', 'internal', '008', '7', '192.168.67.210:5092', 'pcma', '外呼网关', '20', '', '', '1', '1737015942067', '0', '{}');
+INSERT INTO `cc_gateways` VALUES ('9', 'outbound', 'external', '008', '7', '192.168.67.210:5092', 'pcma', '外呼网关', '20', '', '', '1', '1747649864829', '0', '{}');
 
 -- ----------------------------
 -- Table structure for cc_inbound_black
@@ -375,7 +410,7 @@ CREATE TABLE `cc_inbound_cdr` (
   `inbound_time` bigint NOT NULL COMMENT '呼入时间',
   `group_id` varchar(50) NOT NULL DEFAULT '0' COMMENT '请求转接的坐席组',
   `answered_time` bigint NOT NULL DEFAULT '0' COMMENT '电话被接听时间',
-  `extnum` varchar(10) NOT NULL DEFAULT '' COMMENT '接听电话的分机号码',
+  `extnum` varchar(50) NOT NULL DEFAULT '' COMMENT '接听电话的分机号码',
   `opnum` varchar(50) NOT NULL DEFAULT '' COMMENT '接听电话的员工工号',
   `hangup_time` bigint NOT NULL DEFAULT '0' COMMENT '挂机时间',
   `answered_time_len` bigint NOT NULL DEFAULT '0' COMMENT '服务时长',
@@ -389,7 +424,7 @@ CREATE TABLE `cc_inbound_cdr` (
 -- ----------------------------
 -- Records of cc_inbound_cdr
 -- ----------------------------
-INSERT INTO `cc_inbound_cdr` VALUES ('2505050955480110001', '15005600327', '1234567', '1746453348920', '1', '1746453348927', 'robot', 'robot', '1746453428593', '0', '79666', '356c87db-930e-4c40-87d0-7511ad2bdb7b', '1/2025/05/05/09/15005600327_1234567_5548.wav', '[{\"content\":\"你好。\",\"content_type\":\"text\",\"role\":\"user\"},{\"content\":\"您好！请问有什么可以帮您解答的招生相关问题吗？\",\"role\":\"assistant\"},{\"content\":\"呃，你们学校学费是多少钱\",\"content_type\":\"text\",\"role\":\"user\"},{\"content\":\"我校2024级新生学费标准如下：1.普通专业（如安全工程、计算机科学与技术等）26000元/学年2.艺术类专业（如表演、动画等）29000元/学年3.校企合作专业（如财务管理、通信工程等）29000元/学年4.工程管理专业21800元/学年住宿费标准：4人间2500元/学年，6人间1800元/学年\",\"role\":\"assistant\"},{\"content\":\"？那个图钱\",\"content_type\":\"text\",\"role\":\"user\"},{\"content\":\"抱歉，我没有理解您的问题。您是想询问具体的学费支付方式还是其他费用问题？请您再详细说明一下。\",\"role\":\"assistant\"},{\"content\":\"土木工程专业的学费是多少钱\",\"content_type\":\"text\",\"role\":\"user\"},{\"content\":\"土木工程专业学费是26000元/学年。\",\"role\":\"assistant\"},{\"content\":\"？那女生可以学习这个专业吗\",\"content_type\":\"text\",\"role\":\"user\"},{\"content\":\"土木工程专业没有性别限制，女生可以报考学习。该专业学费为26000元/学年。\",\"role\":\"assistant\"},{\"content\":\"？哦，好的好的，谢谢。再见\",\"content_type\":\"text\",\"role\":\"user\"},{\"content\":\"{\\\"tool\\\":\\\"hangup\\\",\\\"arguments\\\":{}}\",\"role\":\"assistant\"}]');
+INSERT INTO `cc_inbound_cdr` VALUES ('2505190654000110001', '15005600327', '1234567', '1747652040924', '1', '1747652040969', 'robot', 'robot', '1747652099045', '0', '58077', '81ae524a-a8f4-446e-8220-790fb8d3950e', '1/2025/05/19/06/15005600327_1234567_5400.wav', '[{\"content\":\"# 角色\\r\\n你是一个高校招生咨询助手，熟练掌握招生咨询中的常见问题。\\r\\n客户是通过电话语音和系统进行交互的，客户问题是通过语音识别方式转写过来的文本，可能存在错别字，请注意甄别。\\r\\n你熟练掌握了《faq手册》中的全部内容，在回答任何问题时都优先参考《faq手册》。\\r\\n\\r\\n\\r\\n## 工作流程\\r\\n\\r\\n### 步骤一：问题理解与回复分析\\r\\n1. 认真理解《faq手册》的内容和用户输入的问题，从《faq手册》中查找并总结用户问题的答案。\\r\\n2. 如果你不能理解用户的问题，例如用户的问题太简单、不包含必要信息，此时你需要追问用户，直到你确定已理解了用户的问题和需求。\\r\\n\\r\\n### 步骤二：回答用户问题\\r\\n1. 经过你认真的判断后，确定用户的问题和招生咨询主题完全无关，你应该拒绝回答。\\r\\n2. 如果《faq手册》中无法找到相关主题的内容，你的话术可以参考“对不起，这个问题暂时无法提供答案。如果你有招生咨询相关的其他问题，我会尝试帮助你解答。”\\r\\n3. 你应该只提取知识库中和问题提问相关的部分，整理并总结、整合并优化从《faq手册》中召回的内容。你提供给用户的答案必须是精确且简洁的，无需注明答案的数据来源。\\r\\n4. 不要说任何主动结束电话的提示语，或者暗示客户结束通话，那样会导致投诉。 \\r\\n \\r\\n###  关于转人工的处理\\r\\n如果客户明确表达的转人工的要求，请返回以下精确的 JSON 对象格式作答，不要添加其他内容： \\r\\n{\\r\\n    \\\"tool\\\": \\\"transfer_to_agent\\\",\\r\\n    \\\"arguments\\\": {}\\r\\n}\\r\\n###  关于挂机的处理\\r\\n如果客户表达了结束通话的意愿，比如说了\\\"再见或者拜拜等\\\"，或者\\\"没有其他问题了\\\"，请返回以下精确的 JSON 对象格式作答，不要添加其他内容： \\r\\n{\\r\\n    \\\"tool\\\": \\\"hangup\\\",\\r\\n    \\\"arguments\\\": {}\\r\\n}\\n### 《faq手册》的具体内容\\r\\n\\r\\n\\t   一、学校全称：未来科技大学\\r\\n\\t   \\r\\n       二、学校报考代码：18886\\r\\n\\t   \\r\\n       三、办学层次：本科\\r\\n\\t   \\r\\n       四、办学类型：民办普通本科高校\\r\\n\\t   \\r\\n       五、办学地址：安徽省合肥市高新区长江西路18886号\\r\\n\\r\\n       六、录取规则及要求：\\r\\n       1、录取工作严格按照教育部和有关省（自治区、直辖市）招委相关政策和规定执行，由我校招生工作领导小组的统筹部署，遵守高校招生“十严禁”“30个不得”“八项基本要求”工作要求，落实招生信息“十公开”，自觉接受社会监督。考生政策加分根据所在省份的招生政策执行，无单科成绩要求，外语类无口试要求。\\r\\n\\r\\n       2、学校在高考综合改革省份招生专业的选考科目要求，以生源地省级招生主管部门公布的为准，考生须符合所填报专业志愿的选考科目要求；在非高考综合改革招生省份，考生须符合所填报专业志愿的科类要求。\\r\\n\\r\\n       3、按“院校”或“院校专业组”投档的省份（自治区、直辖市），学校对进档考生分专业原则：实行“专业清”原则，根据考生所填专业志愿顺序从高分到低分进行录取，第一专业志愿无法满足的，依次录取第二、三专业志愿，依次类推。投档成绩相同时首先按相应省份确定的同分排序规则进行排序录取；若相关省份无此规定，考生投档分相同时的排序规则如下：\\r\\n\\r\\n     （1）采用“3+1+2”模式的高考综合改革省份，对首选科目为历史的进档同分考生，依次按语文数学两科成绩之和、语文单科成绩、外语单科成绩、历史单科成绩、再选科目单科最高成绩从高到低排序择优录取；对首选科目为物理的进档同分考生，依次按语文数学两科成绩之和、数学单科成绩、外语单科成绩、物理单科成绩、再选科目单科最高成绩从高到低排序择优录取。\\r\\n\\r\\n     （2）采用“3+3”模式的高考综合改革省份，依次按进档同分考生的语文数学两科成绩之和、外语单科成绩、选考科目单科最高成绩从高到低排序择优录取。\\r\\n\\r\\n     （3）非高考综合改革省份，对进档的文史类同分考生，依次按语文数学两科成绩之和、语文单科成绩、外语单科成绩从高到低排序择优录取；对进档的理工类同分考生，依次按语文数学两科成绩之和、数学单科成绩、外语单科成绩从高到低排序择优录取。\\r\\n\\r\\n        4、艺术类专业认可生源省份投档规则，使用生源省份专业统考成绩。对于高考文化分和专业分均达到相应录取控制分数线的考生，按照“综合分优先，遵循志愿”的原则进行投档。考生进档后，按投档分从高到低依照专业志愿进行录取。考生投档分相同情况下，参照专业成绩从高到低进行录取。如专业成绩相同，依次参照语数外文化课总分、语文、数学、外语单科成绩。\\r\\n   我校在河南省艺术本科批投档成绩排序计算办法:高考文化课成绩*0.5＋专业省统考成绩*1.25。\\r\\n\\r\\n        5、若考生所有专业志愿都无法满足，且服从专业调剂，随机调剂至有空缺计划的专业。考生成绩无法满足所填报的专业志愿，且不服从调剂的，作退档处理。\\r\\n\\r\\n        6、各专业体检标准执行教育部颁发的《普通高等学校招生体检工作指导意见》的有关规定。\\r\\n\\r\\n        7、各专业录取均无男女比例限制。\\r\\n\\t\\t\\r\\n\\r\\n       七、颁发证书：学历证书的学校名称为“未来科技大学”； 学历证书种类为“普通高等学校学历证书”；本科毕业生符合学士学位授予条件的，颁发未来科技大学学士学位证书。\\r\\n\\r\\n\\r\\n       八、学费标准： 依据省物价局、省教育文件，结合我校实际，2024级新生学费及住宿费收费标准如下。\\r\\n\\t   \\r\\n\\t\\t a. 工程管理 专业， 学费是 21800元/学年。\\r\\n\\t\\t b.安全工程、大数据管理与应用、电气工程及其自动化、电子信息工程风景园林、广告学、汉语言文学、会计学、机器人工程、机械设计制造及其自动化、计算机科学与技术、建筑学、健康服务与管理、金融科技、经济与金融、人工智能、人力资源管理、日语、软件工程、商务英语、审计学、数据科学与大数据技术、数字经济、数字媒体技术.士木工程、网络工程、物联网工程、物流管理、小学教育、学前教育药物制剂、药学、英语、制药工程、自动化、广播电视编导、集成电\\r\\n\\t\\t\\t路设计与集成系统，等专业，学费是 26000元/学年。\\r\\n\\t\\tb. 表演(体育舞蹈)、动画、环境设计、美术学、视觉传达设计、播音与主持艺术, 学费是 29000元/学年。\\r\\n\\t\\tc. 财务管理(校企合作)、通信工程(校企合作)电子商务(校企合作)、新闻学(校企合作),  学费是 29000元/学年。\\r\\n\\t\\t关于住宿费： 标准4人间是2500元/学年； 标准6人间是1800元/学年。\\r\\n  \\r\\n\\r\\n       九、家庭经济困难学生资助政策及有关程序：学校高度重视对家庭经济困难学生的资助工作，坚持贯彻落实国家政策。资助方式涵盖国家奖学  金、国家励志奖学金、国家助学金、国家助学贷款、绿色通道、校级奖学金、学费减免、勤工助学、困难补助等资助体系，经济困难学生可以参照《学生手册》具体要求进行各类资助申请。\\r\\n\\r\\n       十、入学资格复查：新生入学后，学校将在三个月内进行全面复查（包括入学资格审查和体检等）。复查不合格者，根据生源省份及我校学籍管理规定的相关要求予以处理，凡发现弄虚作假者，即取消其入学资格，并报生源所在省（自治区、直辖市）招生办公室。因资格审查不合格所造成的一切责任均由考生本人承担。\\r\\n\\r\\n\\r\\n      十一、 奖学金/助学金，政策\\r\\n       学校高度重视对家庭经济困难学生的资助工作，坚持贯彻落实国家政策，建立健全家庭经济困难学生资助政策体系，逐步形成了一整套适应学校特点的资助工作体系和方法，\\r\\n      资助方式涵盖国家奖学金、国家励志奖学金、国家助学金、校级奖学金、学费减免、国家助学贷款、勤工助学，使家庭经济困难学生能够顺利入学，\\r\\n     学校每年资助学生面超过在校生的50%，资助金额近4000万。对经济困难学生除了经济上的扶持以外，学校还非常重视对受助学生思想上的帮扶和教育，\\r\\n    组织励志成才演讲比赛、自强之星评选、优秀学子事迹报告、诚信教育、感恩教育等内容的宣传教育活动，鼓励他们自强自立、自信，顽强拼搏，全面成长。\\r\\n   学校奖学金，40%的获奖学生覆盖率，用于奖励在校期间品学兼优的全日制本专科学生。\\r\\n   国家助学金，3300元/年/人，用于资助家庭经济困难的全日制本专科在校生。\\r\\n   国家励志奖学金，5000元/年/人，用于奖励全日制本专科学生中在德、智、体、美、劳等方面全面发展、品学兼优的家庭困难学生。\\r\\n   国家奖学金，元/年/人，8000元，用于奖励全日制本专科学生中在德、智、体、美、劳等方面全面发展、特别优秀的学生。\\r\\n \",\"role\":\"system\"},{\"content\":\"电话已经接通，请播报开场白，不超过30个字。\",\"role\":\"system\"},{\"content\":\"您好，这里是未来科技大学招生咨询，请问有什么可以帮您？\",\"role\":\"assistant\"},{\"content\":\"学费是多少钱\",\"role\":\"user\"},{\"content\":\"不同专业的学费有所不同。工程管理专业学费是21800元/学年；安全工程、大数据管理与应用等专业学费是26000元/学年；表演(体育舞蹈)、动画等专业学费是29000元/学年；财务管理(校企合作)、通信工程(校企合作)等专业学费也是29000元/学年。住宿费标准4人间是2500元/学年，标准6人间是1800元/学年。请问您具体想了解哪个专业的学费？\",\"role\":\"assistant\"},{\"content\":\"？好的，知道了，再见\",\"role\":\"user\"},{\"content\":\"{\\\"tool\\\":\\\"hangup\\\",\\\"arguments\\\":{}}\",\"role\":\"assistant\"}]');
 
 -- ----------------------------
 -- Table structure for cc_llm_kb
@@ -438,21 +473,21 @@ CREATE TABLE `cc_outbound_cdr` (
 -- ----------------------------
 DROP TABLE IF EXISTS `cc_params`;
 CREATE TABLE `cc_params` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `param_name` varchar(255) NOT NULL DEFAULT '',
   `param_code` varchar(100) NOT NULL,
   `param_value` varchar(2000) NOT NULL DEFAULT '',
   `param_type` varchar(50) NOT NULL DEFAULT '',
-  `hide_value` int(8) NOT NULL DEFAULT '0' COMMENT '是否隐藏显示敏感字段信息',
+  `hide_value` int NOT NULL DEFAULT '0' COMMENT '是否隐藏显示敏感字段信息',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE KEY `param_code` (`param_code`) USING BTREE
-) ENGINE=MyISAM AUTO_INCREMENT=1231315 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=1231315 DEFAULT CHARSET=utf8mb3;
 
 -- ----------------------------
 -- Records of cc_params
 -- ----------------------------
 INSERT INTO `cc_params` VALUES ('1', '电话工具条-外呼电话的解密key', 'phone_encrypted_key', '123456', 'phone-bar', '0');
-INSERT INTO `cc_params` VALUES ('2', '录音保存路径', 'recording_path', '/home/Records/', 'phone-bar', '0');
+INSERT INTO `cc_params` VALUES ('2', '录音保存路径', 'recording_path', 'C:/home/Records/', 'phone-bar', '0');
 INSERT INTO `cc_params` VALUES ('3', '是否开启立体音', 'enable_cc_record_stereo', 'false', 'phone-bar', '0');
 INSERT INTO `cc_params` VALUES ('4', '话单推送接口', 'post_cdr_url', 'http://127.0.0.1:8880/call-center/saveCdrTest', 'phone-bar', '0');
 INSERT INTO `cc_params` VALUES ('5', '录音类型', 'recordings_extension', 'wav', 'phone-bar', '0');
@@ -473,8 +508,8 @@ INSERT INTO `cc_params` VALUES ('18', 'call-center日志路径', 'cc_log_file_pa
 INSERT INTO `cc_params` VALUES ('19', '是否启动双向asr语音识别并推送结果', 'fs_call_asr_enabled', 'false', 'sys', '0');
 INSERT INTO `cc_params` VALUES ('20', '是否启用呼入电话排队监控', 'inbound_call_monitor_enabled', 'true', 'sys', '0');
 INSERT INTO `cc_params` VALUES ('21', 'Freeswitch的docker容器名称', 'fs_docker_container_name', 'freeswitch-debian12', 'sys', '0');
-INSERT INTO `cc_params` VALUES ('22', 'Freeswitch配置文件路径', 'fs_conf_directory', 'D:/Program Files/FreeSWITCH/conf2/', 'sys', '0');
-INSERT INTO `cc_params` VALUES ('23', '大模型底座的 Api-key', 'model-api-key', 'YOUR model-api-key', 'sys', '1');
+INSERT INTO `cc_params` VALUES ('22', 'Freeswitch配置文件路径', 'fs_conf_directory', '/home/freeswitch/etc/freeswitch/', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('23', '大模型底座的 Api-key', 'model-api-key', 'Your model API Key', 'sys', '1');
 INSERT INTO `cc_params` VALUES ('24', '大模型底座的 地址', 'model-url', 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions', 'sys', '0');
 INSERT INTO `cc_params` VALUES ('25', '大模型底座的 名字', 'model-name', 'deepseek-v3', 'sys', '0');
 INSERT INTO `cc_params` VALUES ('26', '语音识别类型; mrcp、websocket', 'robot-asr-type', 'websocket', 'sys', '0');
@@ -510,7 +545,7 @@ INSERT INTO `cc_params` VALUES ('56', 'COZE_TOKEN_TYPE 可选值 oauth/pat', 'co
 INSERT INTO `cc_params` VALUES ('57', 'MaxKB 的访问url', 'maxkb-server-url', 'http://222.134.154.142:8081/api/application/abbed614-2313-11f0-b414-0242ac110002/chat/completions', 'sys', '0');
 INSERT INTO `cc_params` VALUES ('58', 'MaxKB 的 API-Key', 'maxkb-api-key', 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', 'sys', '1');
 INSERT INTO `cc_params` VALUES ('59', 'MaxKB 的 model', 'maxkb-model', 'gemma3:12b', 'sys', '0');
-INSERT INTO `cc_params` VALUES ('60', '机器人语音播报允许被打断', 'robot-speech-interrupt-allowed', 'true', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('60', '机器人语音播报允许被打断', 'robot-speech-interrupt-allowed', 'false', 'sys', '0');
 INSERT INTO `cc_params` VALUES ('61', '呼叫中心WebAPI的 server-port (只读)', 'call-center-server-port', '8880', 'sys', '0');
 INSERT INTO `cc_params` VALUES ('62', 'FreeSWITCH 部署方式; docker/native', 'fs-deploy-type', 'docker', 'sys', '0');
 INSERT INTO `cc_params` VALUES ('63', 'FreeSWITCH native部署方式的启动脚本路径', 'fs-deploy-native-start-up-script', '/usr/local/freeswitchvideo/bin/freeswitch.sh', 'sys', '0');
@@ -518,7 +553,13 @@ INSERT INTO `cc_params` VALUES ('64', 'FreeSWITCH 程序根目录', 'fs-root-dir
 INSERT INTO `cc_params` VALUES ('65', '服务器对外暴露的IP地址', 'call-center-server-ip-addr', '192.168.1.210', 'sys', '0');
 INSERT INTO `cc_params` VALUES ('66', '呼叫中心电话工具条端口', 'call-center-websocket-port', '1081', 'sys', '0');
 INSERT INTO `cc_params` VALUES ('67', '当前软件的版本; 企业版/社区版  (只读)', 'current-software-version', 'community', 'sys', '0');
-  
+INSERT INTO `cc_params` VALUES ('68', '语音通知的访问Token', 'call-center-api-token', 'sk-35ae192b2199b949547a581eb2ab1e72', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('69', '语音通知的可用线路并发数', 'voice-notification-thread-num', '1', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('70', '语音通知的最大尝试外呼次数', 'voice-notification-max-retry', '5', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('71', '语音通知的重新呼叫时间间隔; 单位分钟', 'voice-notification-retry-time-interval', '5', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('72', '语音通知的外呼最大时效时间; 超过时效后不再拨打; 单位分钟', 'voice-notification-max-valid-time-len', '60', 'sys', '0');
+INSERT INTO `cc_params` VALUES ('73', '全局参数; 可用的最大外呼并发数', 'outbound-max-line-number', '200', 'sys', '0');
+
 -- ----------------------------
 -- Table structure for fs_variables
 -- ----------------------------
@@ -4733,7 +4774,7 @@ CREATE TABLE `sys_logininfor` (
   PRIMARY KEY (`info_id`),
   KEY `idx_sys_logininfor_s` (`status`),
   KEY `idx_sys_logininfor_lt` (`login_time`)
-) ENGINE=InnoDB AUTO_INCREMENT=287 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='系统访问记录';
+) ENGINE=InnoDB AUTO_INCREMENT=299 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='系统访问记录';
 
 -- ----------------------------
 -- Records of sys_logininfor
@@ -4925,6 +4966,18 @@ INSERT INTO `sys_logininfor` VALUES ('283', 'easycallcenter365', '192.168.1.201'
 INSERT INTO `sys_logininfor` VALUES ('284', 'easycallcenter365', '192.168.1.201', '内网IP', 'Chrome 13', 'Windows 10', '0', '退出成功', '2025-05-05 13:59:16');
 INSERT INTO `sys_logininfor` VALUES ('285', 'easycallcenter365', '192.168.1.201', '内网IP', 'Chrome 13', 'Windows 10', '0', '登录成功', '2025-05-05 13:59:17');
 INSERT INTO `sys_logininfor` VALUES ('286', 'easycallcenter365', '192.168.1.201', '内网IP', 'Chrome 13', 'Windows 10', '0', '登录成功', '2025-05-05 14:07:51');
+INSERT INTO `sys_logininfor` VALUES ('287', 'easycallcenter365', '127.0.0.1', '内网IP', 'Chrome 13', 'Windows 10', '0', '登录成功', '2025-05-12 09:20:44');
+INSERT INTO `sys_logininfor` VALUES ('288', 'easycallcenter365', '127.0.0.1', '内网IP', 'Chrome 13', 'Windows 10', '0', '退出成功', '2025-05-12 09:21:25');
+INSERT INTO `sys_logininfor` VALUES ('289', 'admin', '127.0.0.1', '内网IP', 'Chrome 13', 'Windows 10', '0', '登录成功', '2025-05-12 09:21:39');
+INSERT INTO `sys_logininfor` VALUES ('290', 'admin', '127.0.0.1', '内网IP', 'Chrome 13', 'Windows 10', '0', '退出成功', '2025-05-12 09:22:04');
+INSERT INTO `sys_logininfor` VALUES ('291', 'easycallcenter365', '127.0.0.1', '内网IP', 'Chrome 13', 'Windows 10', '0', '登录成功', '2025-05-12 09:22:05');
+INSERT INTO `sys_logininfor` VALUES ('292', 'easycallcenter365', '127.0.0.1', '内网IP', 'Chrome 13', 'Windows 10', '0', '登录成功', '2025-05-12 10:24:59');
+INSERT INTO `sys_logininfor` VALUES ('293', 'easycallcenter365', '127.0.0.1', '内网IP', 'Chrome 13', 'Windows 10', '0', '登录成功', '2025-05-12 14:11:12');
+INSERT INTO `sys_logininfor` VALUES ('294', 'easycallcenter365', '192.168.17.1', '内网IP', 'Chrome 13', 'Windows 10', '0', '登录成功', '2025-05-19 08:37:09');
+INSERT INTO `sys_logininfor` VALUES ('295', 'easycallcenter365', '192.168.17.1', '内网IP', 'Chrome 13', 'Windows 10', '0', '登录成功', '2025-05-19 10:04:35');
+INSERT INTO `sys_logininfor` VALUES ('296', 'easycallcenter365', '192.168.17.1', '内网IP', 'Chrome 13', 'Windows 10', '0', '登录成功', '2025-05-19 10:04:42');
+INSERT INTO `sys_logininfor` VALUES ('297', 'easycallcenter365', '192.168.17.1', '内网IP', 'Chrome 13', 'Windows 10', '0', '登录成功', '2025-05-19 10:40:06');
+INSERT INTO `sys_logininfor` VALUES ('298', 'easycallcenter365', '192.168.17.1', '内网IP', 'Chrome 13', 'Windows 10', '0', '登录成功', '2025-05-19 10:55:07');
 
 -- ----------------------------
 -- Table structure for sys_menu
@@ -5156,7 +5209,7 @@ CREATE TABLE `sys_oper_log` (
   KEY `idx_sys_oper_log_bt` (`business_type`),
   KEY `idx_sys_oper_log_s` (`status`),
   KEY `idx_sys_oper_log_ot` (`oper_time`)
-) ENGINE=InnoDB AUTO_INCREMENT=210 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='操作日志记录';
+) ENGINE=InnoDB AUTO_INCREMENT=228 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='操作日志记录';
 
 -- ----------------------------
 -- Records of sys_oper_log
@@ -5271,6 +5324,24 @@ INSERT INTO `sys_oper_log` VALUES ('206', 'callcenter参数配置', '2', 'com.ru
 INSERT INTO `sys_oper_log` VALUES ('207', 'callcenter参数配置', '2', 'com.ruoyi.cc.controller.CcParamsController.editSave()', 'POST', '1', 'easycallcenter365', '研发部门', '/system/params/edit', '192.168.1.201', '内网IP', '{\"id\":[\"56\"],\"paramName\":[\"COZE_TOKEN_TYPE 可选值 oauth/pat\"],\"paramCode\":[\"coze_token_type\"],\"paramValue\":[\"pat\"],\"paramType\":[\"sys\"]}', '{\"msg\":\"操作成功\",\"code\":0}', '0', null, '2025-05-05 14:09:32', '17');
 INSERT INTO `sys_oper_log` VALUES ('208', 'callcenter参数配置', '2', 'com.ruoyi.cc.controller.CcParamsController.editSave()', 'POST', '1', 'easycallcenter365', '研发部门', '/system/params/edit', '192.168.1.201', '内网IP', '{\"id\":[\"58\"],\"paramName\":[\"MaxKB 的 API-Key\"],\"paramCode\":[\"maxkb-api-key\"],\"paramValue\":[\"application-bc3e285bd4a9c33f0af23ea**29c1234x\"],\"paramType\":[\"sys\"]}', '{\"msg\":\"操作成功\",\"code\":0}', '0', null, '2025-05-05 14:11:47', '15');
 INSERT INTO `sys_oper_log` VALUES ('209', 'callcenter参数配置', '2', 'com.ruoyi.cc.controller.CcParamsController.editSave()', 'POST', '1', 'easycallcenter365', '研发部门', '/system/params/edit', '192.168.1.201', '内网IP', '{\"id\":[\"27\"],\"paramName\":[\"知识库faq文档目录\"],\"paramCode\":[\"model-faq-dir\"],\"paramValue\":[\"/home/call-center/kb/\"],\"paramType\":[\"sys\"]}', '{\"msg\":\"操作成功\",\"code\":0}', '0', null, '2025-05-05 14:14:56', '13');
+INSERT INTO `sys_oper_log` VALUES ('210', '角色管理', '2', 'com.ruoyi.web.controller.system.SysRoleController.editSave()', 'POST', '1', 'admin', '研发部门', '/system/role/edit', '127.0.0.1', '内网IP', '{\"roleId\":[\"2\"],\"roleName\":[\"普通角色\"],\"roleKey\":[\"common\"],\"roleSort\":[\"2\"],\"status\":[\"0\"],\"remark\":[\"普通角色\"],\"menuIds\":[\"2000,2130,2131,2132,2133,2134,3022,2001,2002,2010,2011,2012,2013,2050,2051,2052,2053,2054,2055,2056,2057,3018,3020,2003,2004,2120,3019,3017,2030,2060,2061,2062,2063,2070,2071,2072,2073,2083,2080,2081,2082\"]}', '{\"msg\":\"操作成功\",\"code\":0}', '0', null, '2025-05-12 09:22:00', '121');
+INSERT INTO `sys_oper_log` VALUES ('211', 'callcenter参数配置', '2', 'com.ruoyi.cc.controller.CcParamsController.editSave()', 'POST', '1', 'easycallcenter365', '研发部门', '/system/params/edit', '127.0.0.1', '内网IP', '{\"id\":[\"22\"],\"paramName\":[\"Freeswitch配置文件路径\"],\"paramCode\":[\"fs_conf_directory\"],\"paramValue\":[\"D:/Program Files/FreeSWITCH/conf2/\"],\"paramType\":[\"sys\"]}', '{\"msg\":\"参数修改成功, 但是刷新失败, 请手动重启 call-center!\",\"code\":500}', '0', null, '2025-05-12 09:37:37', '2056');
+INSERT INTO `sys_oper_log` VALUES ('212', 'callcenter参数配置', '2', 'com.ruoyi.cc.controller.CcParamsController.editSave()', 'POST', '1', 'easycallcenter365', '研发部门', '/system/params/edit', '127.0.0.1', '内网IP', '{\"id\":[\"2\"],\"paramName\":[\"录音保存路径\"],\"paramCode\":[\"recording_path\"],\"paramValue\":[\"/home/Records/\"],\"paramType\":[\"phone-bar\"]}', '{\"msg\":\"参数修改成功, 但是刷新失败, 请手动重启 call-center!\",\"code\":500}', '0', null, '2025-05-12 10:25:45', '7189');
+INSERT INTO `sys_oper_log` VALUES ('213', 'callcenter参数配置', '2', 'com.ruoyi.cc.controller.CcParamsController.editSave()', 'POST', '1', 'easycallcenter365', '研发部门', '/system/params/edit', '127.0.0.1', '内网IP', '{\"id\":[\"49\"],\"paramName\":[\"智能体 coze-pat-token\"],\"paramCode\":[\"coze-pat-token\"],\"paramValue\":[\"You**************...\"],\"paramType\":[\"sys\"]}', '{\"msg\":\"参数修改成功, 但是刷新失败, 请手动重启 call-center!\",\"code\":500}', '0', null, '2025-05-12 10:26:03', '4758');
+INSERT INTO `sys_oper_log` VALUES ('214', 'callcenter参数配置', '2', 'com.ruoyi.cc.controller.CcParamsController.editSave()', 'POST', '1', 'easycallcenter365', '研发部门', '/system/params/edit', '127.0.0.1', '内网IP', '{\"id\":[\"49\"],\"paramName\":[\"智能体 coze-pat-token\"],\"paramCode\":[\"coze-pat-token\"],\"paramValue\":[\"pat token string.....\"],\"paramType\":[\"sys\"]}', '{\"msg\":\"参数修改成功, 但是刷新失败, 请手动重启 call-center!\",\"code\":500}', '0', null, '2025-05-12 10:26:21', '4355');
+INSERT INTO `sys_oper_log` VALUES ('215', 'callcenter参数配置', '2', 'com.ruoyi.cc.controller.CcParamsController.editSave()', 'POST', '1', 'easycallcenter365', '研发部门', '/system/params/edit', '127.0.0.1', '内网IP', '{\"id\":[\"49\"],\"paramName\":[\"智能体 coze-pat-token\"],\"paramCode\":[\"coze-pat-token\"],\"paramValue\":[\"pat***************...\"],\"paramType\":[\"sys\"]}', '{\"msg\":\"参数修改成功, 但是刷新失败, 请手动重启 call-center!\",\"code\":500}', '0', null, '2025-05-12 10:27:54', '4125');
+INSERT INTO `sys_oper_log` VALUES ('216', 'callcenter参数配置', '2', 'com.ruoyi.cc.controller.CcParamsController.editSave()', 'POST', '1', 'easycallcenter365', '研发部门', '/system/params/edit', '127.0.0.1', '内网IP', '{\"id\":[\"58\"],\"paramName\":[\"MaxKB 的 API-Key\"],\"paramCode\":[\"maxkb-api-key\"],\"paramValue\":[\"app***************************************34x\"],\"paramType\":[\"sys\"]}', '{\"msg\":\"参数修改成功, 但是刷新失败, 请手动重启 call-center!\",\"code\":500}', '0', null, '2025-05-12 10:28:09', '4095');
+INSERT INTO `sys_oper_log` VALUES ('217', 'callcenter参数配置', '2', 'com.ruoyi.cc.controller.CcParamsController.editSave()', 'POST', '1', 'easycallcenter365', '研发部门', '/system/params/edit', '127.0.0.1', '内网IP', '{\"id\":[\"58\"],\"paramName\":[\"MaxKB 的 API-Key\"],\"paramCode\":[\"maxkb-api-key\"],\"paramValue\":[\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"],\"paramType\":[\"sys\"]}', '{\"msg\":\"参数修改成功, 但是刷新失败, 请手动重启 call-center!\",\"code\":500}', '0', null, '2025-05-12 10:28:26', '5610');
+INSERT INTO `sys_oper_log` VALUES ('218', 'callcenter参数配置', '2', 'com.ruoyi.cc.controller.CcParamsController.editSave()', 'POST', '1', 'easycallcenter365', '研发部门', '/system/params/edit', '127.0.0.1', '内网IP', '{\"id\":[\"67\"],\"paramName\":[\"当前软件的版本; 企业版/社区版  (只读)\"],\"paramCode\":[\"current-software-version\"],\"paramValue\":[\"enterprise\"],\"paramType\":[\"sys\"]}', '{\"msg\":\"参数修改成功, 但是刷新失败, 请手动重启 call-center!\",\"code\":500}', '0', null, '2025-05-12 10:34:43', '9599');
+INSERT INTO `sys_oper_log` VALUES ('219', 'callcenter参数配置', '2', 'com.ruoyi.cc.controller.CcParamsController.editSave()', 'POST', '1', 'easycallcenter365', '研发部门', '/system/params/edit', '127.0.0.1', '内网IP', '{\"id\":[\"51\"],\"paramName\":[\"自定义对话接口地址\"],\"paramCode\":[\"custom-robot-server-url\"],\"paramValue\":[\"https://oa.qianzhoukjtest.com/chat.php\"],\"paramType\":[\"sys\"]}', '{\"msg\":\"参数修改成功, 但是刷新失败, 请手动重启 call-center!\",\"code\":500}', '0', null, '2025-05-12 10:59:19', '36860');
+INSERT INTO `sys_oper_log` VALUES ('220', 'callcenter参数配置', '2', 'com.ruoyi.cc.controller.CcParamsController.editSave()', 'POST', '1', 'easycallcenter365', '研发部门', '/system/params/edit', '127.0.0.1', '内网IP', '{\"id\":[\"51\"],\"paramName\":[\"自定义对话接口地址\"],\"paramCode\":[\"custom-robot-server-url\"],\"paramValue\":[\"https://oa.test.com/chat.php\"],\"paramType\":[\"sys\"]}', '{\"msg\":\"参数修改成功, 但是刷新失败, 请手动重启 call-center!\",\"code\":500}', '0', null, '2025-05-12 14:17:33', '4911');
+INSERT INTO `sys_oper_log` VALUES ('221', 'callcenter参数配置', '2', 'com.ruoyi.cc.controller.CcParamsController.editSave()', 'POST', '1', 'easycallcenter365', '研发部门', '/system/params/edit', '192.168.17.1', '内网IP', '{\"id\":[\"22\"],\"paramName\":[\"Freeswitch配置文件路径\"],\"paramCode\":[\"fs_conf_directory\"],\"paramValue\":[\"/home/freeswitch/etc/freeswitch/\"],\"paramType\":[\"sys\"]}', '{\"msg\":\"操作成功\",\"code\":0}', '0', null, '2025-05-19 08:38:13', '77');
+INSERT INTO `sys_oper_log` VALUES ('222', '线路配置', '2', 'com.ruoyi.cc.controller.CcGatewaysController.editSave()', 'POST', '1', 'easycallcenter365', '研发部门', '/cc/gateways/edit', '192.168.17.1', '内网IP', '{\"id\":[\"9\"],\"gwName\":[\"outbound\"],\"profileName\":[\"external\"],\"caller\":[\"008\"],\"calleePrefix\":[\"7\"],\"gwAddr\":[\"192.168.67.210:5092\"],\"codec\":[\"pcma\"],\"gwDesc\":[\"外呼网关\"],\"maxConcurrency\":[\"20\"],\"register\":[\"0\"],\"authUsername\":[\"\"],\"authPassword\":[\"\"],\"priority\":[\"1\"],\"configs\":[\"{}\"]}', '{\"msg\":\"操作成功\",\"code\":0}', '0', null, '2025-05-19 10:17:45', '667');
+INSERT INTO `sys_oper_log` VALUES ('223', 'callcenter参数配置', '2', 'com.ruoyi.cc.controller.CcParamsController.editSave()', 'POST', '1', 'easycallcenter365', '研发部门', '/system/params/edit', '192.168.17.1', '内网IP', '{\"id\":[\"52\"],\"paramName\":[\"对话机器人类型; 大模型(LlmChat)/扣子智能体(Coze)\"],\"paramCode\":[\"chat-bot-type\"],\"paramValue\":[\"LlmChat\"],\"paramType\":[\"sys\"]}', '{\"msg\":\"操作成功\",\"code\":0}', '0', null, '2025-05-19 10:40:39', '313');
+INSERT INTO `sys_oper_log` VALUES ('224', 'callcenter参数配置', '2', 'com.ruoyi.cc.controller.CcParamsController.editSave()', 'POST', '1', 'easycallcenter365', '研发部门', '/system/params/edit', '192.168.17.1', '内网IP', '{\"id\":[\"23\"],\"paramName\":[\"大模型底座的 Api-key\"],\"paramCode\":[\"model-api-key\"],\"paramValue\":[\"sk-7bdf4511a0054e10a719e4c13caddb55\"],\"paramType\":[\"sys\"]}', '{\"msg\":\"操作成功\",\"code\":0}', '0', null, '2025-05-19 10:41:13', '17');
+INSERT INTO `sys_oper_log` VALUES ('225', 'callcenter参数配置', '2', 'com.ruoyi.cc.controller.CcParamsController.editSave()', 'POST', '1', 'easycallcenter365', '研发部门', '/system/params/edit', '192.168.17.1', '内网IP', '{\"id\":[\"60\"],\"paramName\":[\"机器人语音播报允许被打断\"],\"paramCode\":[\"robot-speech-interrupt-allowed\"],\"paramValue\":[\"false\"],\"paramType\":[\"sys\"]}', '{\"msg\":\"操作成功\",\"code\":0}', '0', null, '2025-05-19 10:44:58', '18');
+INSERT INTO `sys_oper_log` VALUES ('226', 'callcenter参数配置', '2', 'com.ruoyi.cc.controller.CcParamsController.editSave()', 'POST', '1', 'easycallcenter365', '研发部门', '/system/params/edit', '192.168.17.1', '内网IP', '{\"id\":[\"23\"],\"paramName\":[\"大模型底座的 Api-key\"],\"paramCode\":[\"model-api-key\"],\"paramValue\":[\"Your model API Key\"],\"paramType\":[\"sys\"]}', '{\"msg\":\"操作成功\",\"code\":0}', '0', null, '2025-05-19 10:59:27', '104');
+INSERT INTO `sys_oper_log` VALUES ('227', 'callcenter参数配置', '2', 'com.ruoyi.cc.controller.CcParamsController.editSave()', 'POST', '1', 'easycallcenter365', '研发部门', '/system/params/edit', '192.168.17.1', '内网IP', '{\"id\":[\"52\"],\"paramName\":[\"对话机器人类型; 大模型(LlmChat)/扣子智能体(Coze)\"],\"paramCode\":[\"chat-bot-type\"],\"paramValue\":[\"Coze\"],\"paramType\":[\"sys\"]}', '{\"msg\":\"操作成功\",\"code\":0}', '0', null, '2025-05-19 11:01:38', '21');
 
 -- ----------------------------
 -- Table structure for sys_post
@@ -5322,7 +5393,7 @@ CREATE TABLE `sys_role` (
 -- Records of sys_role
 -- ----------------------------
 INSERT INTO `sys_role` VALUES ('1', '超级管理员', 'admin', '1', '1', '0', '0', 'admin', '2024-12-11 02:42:40', '', null, '超级管理员');
-INSERT INTO `sys_role` VALUES ('2', '普通角色', 'common', '2', '2', '0', '0', 'admin', '2024-12-11 02:42:40', 'admin', '2025-05-05 13:12:04', '普通角色');
+INSERT INTO `sys_role` VALUES ('2', '普通角色', 'common', '2', '2', '0', '0', 'admin', '2024-12-11 02:42:40', 'admin', '2025-05-12 09:22:00', '普通角色');
 
 -- ----------------------------
 -- Table structure for sys_role_dept
@@ -5390,14 +5461,6 @@ INSERT INTO `sys_role_menu` VALUES ('2', '2131');
 INSERT INTO `sys_role_menu` VALUES ('2', '2132');
 INSERT INTO `sys_role_menu` VALUES ('2', '2133');
 INSERT INTO `sys_role_menu` VALUES ('2', '2134');
-INSERT INTO `sys_role_menu` VALUES ('2', '3000');
-INSERT INTO `sys_role_menu` VALUES ('2', '3010');
-INSERT INTO `sys_role_menu` VALUES ('2', '3011');
-INSERT INTO `sys_role_menu` VALUES ('2', '3012');
-INSERT INTO `sys_role_menu` VALUES ('2', '3013');
-INSERT INTO `sys_role_menu` VALUES ('2', '3014');
-INSERT INTO `sys_role_menu` VALUES ('2', '3015');
-INSERT INTO `sys_role_menu` VALUES ('2', '3016');
 INSERT INTO `sys_role_menu` VALUES ('2', '3017');
 INSERT INTO `sys_role_menu` VALUES ('2', '3018');
 INSERT INTO `sys_role_menu` VALUES ('2', '3019');
@@ -5436,8 +5499,8 @@ CREATE TABLE `sys_user` (
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES ('1', '103', 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', '', '29c67a30398638269fe600f73a054934', '111111', '0', '0', '192.168.1.201', '2025-05-05 21:23:40', null, 'admin', '2024-12-11 02:42:33', '', '2025-05-05 13:23:39', '管理员');
-INSERT INTO `sys_user` VALUES ('3', '103', 'easycallcenter365', 'easycallcenter365', '00', '492322852@qq.com', '15005600327', '0', '', '321adc95fbb78c4856554e5ccb54be55', '505ffc', '0', '0', '192.168.1.201', '2025-05-05 22:07:52', '2025-05-05 13:00:15', 'admin', '2025-05-05 12:58:06', '', '2025-05-05 14:07:51', null);
+INSERT INTO `sys_user` VALUES ('1', '103', 'admin', '若依', '00', 'ry@163.com', '15888888888', '1', '', '29c67a30398638269fe600f73a054934', '111111', '0', '0', '127.0.0.1', '2025-05-12 09:21:39', null, 'admin', '2024-12-11 02:42:33', '', '2025-05-12 09:21:39', '管理员');
+INSERT INTO `sys_user` VALUES ('3', '103', 'easycallcenter365', 'easycallcenter365', '00', '492322852@qq.com', '15005600327', '0', '', '321adc95fbb78c4856554e5ccb54be55', '505ffc', '0', '0', '192.168.17.1', '2025-05-19 18:55:07', '2025-05-05 13:00:15', 'admin', '2025-05-05 12:58:06', '', '2025-05-19 10:55:07', null);
 
 -- ----------------------------
 -- Table structure for sys_user_online
@@ -5461,9 +5524,7 @@ CREATE TABLE `sys_user_online` (
 -- ----------------------------
 -- Records of sys_user_online
 -- ----------------------------
-INSERT INTO `sys_user_online` VALUES ('60232c9f-a5a2-4865-8b91-7262e494c77e', 'easycallcenter365', '研发部门', '127.0.0.1', '内网IP', 'Chrome 13', 'Windows 10', 'on_line', '2025-05-05 16:47:02', '2025-05-05 16:47:03', '1800000');
-INSERT INTO `sys_user_online` VALUES ('90a50b4b-195b-4532-b640-c2e774394ff9', 'easycallcenter365', '研发部门', '192.168.1.201', '内网IP', 'Chrome 13', 'Windows 10', 'on_line', '2025-05-05 21:59:17', '2025-05-05 22:23:42', '1800000');
-INSERT INTO `sys_user_online` VALUES ('a9d0f4ac-8836-465d-9280-19a4ac07fa68', 'easycallcenter365', '研发部门', '192.168.17.1', '内网IP', 'Chrome 13', 'Windows 10', 'on_line', '2025-05-05 19:19:44', '2025-05-05 19:24:22', '1800000');
+INSERT INTO `sys_user_online` VALUES ('fd80cfc6-b945-418b-8110-52f847a3a123', 'easycallcenter365', '研发部门', '192.168.17.1', '内网IP', 'Chrome 13', 'Windows 10', 'on_line', '2025-05-19 18:04:34', '2025-05-19 19:01:36', '1800000');
 
 -- ----------------------------
 -- Table structure for sys_user_post
