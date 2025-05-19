@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.telerobot.fs.mybatis.persistence.CcCallVoiceNotificationMapper">
+
+    <resultMap id="BaseResultMap" type="com.telerobot.fs.entity.dao.CallVoiceNotification">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="telephone" property="telephone" jdbcType="VARCHAR"/>
+        <result column="createtime" property="createtime" jdbcType="BIGINT"/>
+        <result column="callstatus" property="callstatus" jdbcType="SMALLINT"/>
+        <result column="callout_time" property="calloutTime" jdbcType="BIGINT"/>
+        <result column="callcount" property="callcount" jdbcType="SMALLINT"/>
+        <result column="call_end_time" property="callEndTime" jdbcType="BIGINT"/>
+        <result column="time_len" property="timeLen" jdbcType="INTEGER"/>
+        <result column="valid_time_len" property="validTimeLen" jdbcType="INTEGER"/>
+        <result column="uuid" property="uuid" jdbcType="VARCHAR"/>
+        <result column="connected_time" property="connectedTime" jdbcType="BIGINT"/>
+        <result column="hangup_cause" property="hangupCause" jdbcType="VARCHAR"/>
+        <result column="dialogue" property="dialogue" jdbcType="LONGVARCHAR"/>
+        <result column="recordings_file" property="recordingsFile" jdbcType="VARCHAR"/>
+        <result column="gateway_id" property="gatewayId" jdbcType="INTEGER"/>
+        <result column="gateway_name" property="gatewayName" jdbcType="VARCHAR"/>
+        <result column="voice_file_save_path" property="voiceFileSavePath" jdbcType="VARCHAR"/>
+        <result column="voice_file_url" property="voiceFileUrl" jdbcType="VARCHAR"/>
+        <result column="batch_id" property="batchId" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.telerobot.fs.entity.dao.CallVoiceNotification">
+        INSERT INTO cc_call_voice_notification (
+            id, telephone, createtime, callstatus,
+            callout_time, callcount, call_end_time, time_len,
+            valid_time_len, uuid, connected_time, hangup_cause,
+            dialogue, recordings_file, gateway_id, gateway_name,
+            voice_file_save_path, voice_file_url, batch_id
+        ) VALUES (
+            #{id}, #{telephone}, #{createtime}, #{callstatus},
+            #{calloutTime}, #{callcount}, #{callEndTime}, #{timeLen},
+            #{validTimeLen}, #{uuid}, #{connectedTime}, #{hangupCause},
+            #{dialogue}, #{recordingsFile}, #{gatewayId}, #{gatewayName},
+            #{voiceFileSavePath}, #{voiceFileUrl}, #{item.batchId}
+        )
+    </insert>
+
+    <insert id="insertBatch" parameterType="list">
+        INSERT INTO cc_call_voice_notification (
+        id, telephone, createtime, callstatus,
+        callout_time, callcount, call_end_time, time_len,
+        valid_time_len, uuid, connected_time, hangup_cause,
+        dialogue, recordings_file, gateway_id, gateway_name,
+        voice_file_save_path, voice_file_url, batch_id
+        ) VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.id}, #{item.telephone}, #{item.createtime}, #{item.callstatus},
+            #{item.calloutTime}, #{item.callcount}, #{item.callEndTime}, #{item.timeLen},
+            #{item.validTimeLen}, #{item.uuid}, #{item.connectedTime}, #{item.hangupCause},
+            #{item.dialogue}, #{item.recordingsFile}, #{item.gatewayId}, #{item.gatewayName},
+            #{item.voiceFileSavePath}, #{item.voiceFileUrl}, #{item.batchId}
+            )
+        </foreach>
+    </insert>
+
+    <update id="updateBatch" parameterType="list">
+        <foreach collection="list" item="item" separator=";">
+            UPDATE cc_call_voice_notification
+            <set>
+                <if test="item.createtime != null">createtime = #{item.createtime},</if>
+                <if test="item.callstatus != null">callstatus = #{item.callstatus},</if>
+                <if test="item.calloutTime != null">callout_time = #{item.calloutTime},</if>
+                <if test="item.callcount != null">callcount = #{item.callcount},</if>
+                <if test="item.callEndTime != null">call_end_time = #{item.callEndTime},</if>
+                <if test="item.timeLen != null">time_len = #{item.timeLen},</if>
+                <if test="item.validTimeLen != null">valid_time_len = #{item.validTimeLen},</if>
+                <if test="item.uuid != null">uuid = #{item.uuid},</if>
+                <if test="item.connectedTime != null">connected_time = #{item.connectedTime},</if>
+                <if test="item.hangupCause != null">hangup_cause = #{item.hangupCause},</if>
+                <if test="item.dialogue != null">dialogue = #{item.dialogue},</if>
+                <if test="item.recordingsFile != null">recordings_file = #{item.recordingsFile},</if>
+                <if test="item.gatewayId != null">gateway_id = #{item.gatewayId},</if>
+                <if test="item.gatewayName != null">gateway_name = #{item.gatewayName},</if>
+                <if test="item.voiceFileSavePath != null">voice_file_save_path = #{item.voiceFileSavePath},</if>
+                <if test="item.voiceFileUrl != null">voice_file_url = #{item.voiceFileUrl}</if>
+            </set>
+            WHERE id = #{item.id}
+        </foreach>
+    </update>
+
+    <select id="selectByTelephone" resultMap="BaseResultMap">
+        SELECT *
+        FROM cc_call_voice_notification
+        WHERE telephone = #{telephone}
+   </select>
+
+    <select id="selectByBatchId" resultMap="BaseResultMap">
+        SELECT *
+        FROM cc_call_voice_notification
+        WHERE batch_id = #{batchId}
+   </select>
+
+   <select id="selectRetryCallPhones" resultMap="BaseResultMap">
+       <![CDATA[
+        SELECT * FROM cc_call_voice_notification
+        where callstatus=3 and callcount <  #{maxRetry}  and call_end_time < #{timeLimit}  and call_end_time > #{validTime}
+       ]]>
+   </select>
+
+    <!-- 修改 callstatus、call_end_time的值，利用重新外呼机制，使得异常的数据有机会重新执行外呼;  -->
+    <update id="resetHistoryData" >
+        <![CDATA[
+         update  cc_call_voice_notification set callstatus=3, call_end_time = #{currentTime}
+           where (callstatus=0 OR callstatus=1 OR callstatus=2)
+           and createtime > #{todayTime}
+        ]]>
+    </update>
+
+    <delete id="deleteBatchByIds" parameterType="list">
+        DELETE FROM cc_call_voice_notification
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+
+</mapper>

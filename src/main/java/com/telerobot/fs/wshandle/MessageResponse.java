@@ -23,7 +23,7 @@ public class MessageResponse implements Serializable {
 	}
 	
 	/**
-	 * 操作失败的错误代码
+	 * 操作的返回的代码
 	 */
 	private int status=200;
 	 

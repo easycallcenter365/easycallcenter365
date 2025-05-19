@@ -33,6 +33,37 @@ import java.util.zip.ZipOutputStream;
 public class CommonUtils<T>  {
 	private static final Logger logger = LoggerFactory.getLogger(CommonUtils.class);
 
+    public static  boolean safeCreateDirectory(String dir){
+		File directory = new File(dir);
+		if(!directory.exists()){
+			synchronized (dir.intern()){
+				if(!directory.exists()){
+				  return directory.mkdirs();
+				}
+			}
+		}
+        return true;
+	}
+
+	/**
+	 *  校验客户端 http 请求的 token
+	 * @param request
+	 * @return
+	 */
+	public static String validateHttpHeaderToken(HttpServletRequest request,  HttpServletResponse response) {
+		String sysToken = SystemConfig.getValue("call-center-api-token", "");
+		String token = request.getHeader("Authorization");
+		// remove start string: "Bearer "
+		if (!StringUtils.isEmpty(token) && token.length() > 7) {
+			token = token.substring(7);
+		}
+		if (!sysToken.equals(token)) {
+			response.setStatus(400);
+			return "{ \"code\": 400, \"msg\" : \"validate token error.\" }";
+		}
+		return "";
+	}
+
 	public static Map<String, String> parseUrlQueryString(String queryString) throws UnsupportedEncodingException {
 		Map<String, String> queryPairs = new HashMap<>(16);
 		String[] pairs = queryString.split("&");
@@ -249,13 +280,7 @@ public class CommonUtils<T>  {
     }
     
     public static void main(String[] args) {
-    	String[] array = new String[]{"a","b","a","c","d"};
-		List<String> returnList = new CommonUtils<String>().uniqueArray(array);
-		System.out.println(returnList);
-		
-		Integer[] array2 = new Integer[]{1,2,3,4,4,2,2,1,1};
-		List<Integer> returnList2 = new CommonUtils<Integer>().uniqueArray(array2);
-		System.out.println(returnList2);
+
 	}
 
     public static Boolean createZipFile(String sourceFile, String zipFilePath) {

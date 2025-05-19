@@ -14,11 +14,11 @@ docker start  freeswitch-debian12
 sleep 5
 
 echo "Try to start easycallcenter365.jar "
-nohup /usr/local/jdk1.8.0_131/bin/java  -Dfile.encoding=UTF-8  -jar  easycallcenter365.jar > /dev/null 2>&1 &
+nohup /usr/local/jdk1.8.0_391/bin/java  -Dfile.encoding=UTF-8  -jar  easycallcenter365.jar > /dev/null 2>&1 &
 sleep 5
 
 echo "Try to start callcenter-manager.jar"
-nohup /usr/local/jdk1.8.0_131/bin/java  -Dfile.encoding=UTF-8  -jar  callcenter-manager.jar > /dev/null 2>&1 &
+nohup /usr/local/jdk1.8.0_391/bin/java  -Dfile.encoding=UTF-8  -jar  easycallcenter365-gui.jar > /dev/null 2>&1 &
 
 echo " "
 echo "Done."

@@ -102,6 +102,7 @@ public class LlmChat extends AbstractChatRobot {
         requestBody.put("stream", true);
         // enable stream output
 
+
         JSONArray messagesArray = new JSONArray();
         messagesArray.addAll(messages);
         requestBody.put("messages", messagesArray);
