@@ -96,10 +96,6 @@ public class CdrControllerEx {
 			tips = "auto_batchcall_flag detected.";
 			return tips;
 		}
-		if("inbound".equalsIgnoreCase(direction)){
-			tips = "data ignored, only outbound call is recorded.";
-			return tips;
-		}
 		if(StringUtils.isNullOrEmpty(fullRecordPath)){
 			tips = "fullRecordPath is null ,skip this recordings.";
 			logger.info(tips);

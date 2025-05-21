@@ -27,6 +27,33 @@ import java.util.Date;
 import java.util.concurrent.ThreadPoolExecutor;
 
 
+// public.xml config sample:
+/**
+ *
+ *    <extension name="inbound_acd">
+ *           <condition field="destination_number"  expression="^(99999easycallcenter365)$" >
+ *               <action application="set" data="inherit_codec=true"/>
+ *               <action application="set" data="not_save_record_flag=1"/>
+ *               <action application="answer" />
+ *               <action application="start_dtmf"/>
+ *               <action application="export" data="RECORD_STEREO=true"/>
+ *               <action application="set" data="RECORD_STEREO=true"/>
+ *               <action application="log" data="INFO ${uuid}  caller=${caller_id_number}, callee=$1 " />
+ *               <action application="log" data="INFO local_media_port=${local_media_port}, remote_media_port=${remote_media_port}, local_video_port=${local_video_port}, remote_video_port=${remote_video_port}" />
+ *               <action application="set" data="record_sample_rate=8000"/>
+ *               <action application="set" data="RECORD_STEREO=false"/>
+ *               <action application="set" data="continue_on_fail=true"/>
+ *               <action application="set" data="hangup_after_bridge=false"/>
+ *               <action application="set" data="record-time=${strftime(%Y%m%d%H%M%S)}" />
+ *               <action application="set" data="groupId=1"/>
+ *               <action application="set" data="send_silence_when_idle=-1"/>
+ *               <action application="curl" data="http://127.0.0.1:8870/call-center/inboundProcessor?remote_video_port=${remote_video_port}&amp;local-media-port=${local_media_port}&amp;uuid=${uuid}&amp;caller=${caller_id_number}&amp;callee=$1&amp;load-test-uuid=${uuid}&amp;wav-file=${wav-file}&amp;group-id=${groupId}"/>
+ *               <action application="park" />
+ *           </condition>
+ *       </extension>
+ *
+ */
+
 @Controller
 @Scope("request")
 public class InboundCallController {
@@ -44,6 +71,11 @@ public class InboundCallController {
 	@RequestMapping("/inboundProcessor")
 	@ResponseBody
 	public String inboundCall(HttpServletRequest request) throws InstantiationException, IllegalAccessException {
+		String clientIP = request.getRemoteAddr();
+		if(!"127.0.0.1".equalsIgnoreCase(clientIP)){
+			return  "Forbidden, only '127.0.0.1' is allowed.";
+		}
+
 		final String uuid = request.getParameter("uuid");
 		final String caller = request.getParameter("caller").replace("+86", "");
 		final String callee = request.getParameter("callee").replace("+86", "");

@@ -1,5 +1,6 @@
 package com.telerobot.fs.robot;
 
+import com.telerobot.fs.entity.bo.InboundDetail;
 import com.telerobot.fs.entity.dto.LlmAiphoneRes;
 
 public interface IChatRobot {
@@ -16,6 +17,12 @@ public interface IChatRobot {
      * @param uuid
      */
     void setUuid(String uuid);
+
+
+    /**
+     *  通话记录信息
+     */
+    void setCallDetail(InboundDetail callDetail);
 
     /**
      *  获取对话内容

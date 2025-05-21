@@ -61,6 +61,7 @@ public class RobotChat extends RobotBase {
         AcdSqlQueue.addToSqlQueue(callDetail);
         callTaskList.put(uuid, this);
         createChatBot();
+        chatRobot.setCallDetail(callDetail);
     }
 
     public void startProcess(String uniqueID) {
