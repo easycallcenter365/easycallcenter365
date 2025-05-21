@@ -31,6 +31,8 @@ public class OutboundController {
         //   <extension name="outbound">
         //       <condition field="destination_number"  expression="^(\d{11,13})$" >
         //               <action application="set" data="inherit_codec=true"/>
+        //               <action application="set" data="extnum=${caller_id_number}" />
+        //               <action application="set" data="opnum=${caller_id_number}" />
         //               <action application="set" data="cc_call_leg_uuid=${uuid}" />
         //               <action application="set" data="fullrecordpath=manual/${strftime(%Y/%m/%d/)}${caller_id_number}_$1_${uuid}.wav" />
         //               <action application="record_session" data="$${recording_path}${fullrecordpath}"/>

@@ -132,7 +132,7 @@ public class CdrControllerEx {
 			cdrEntity.setCallType("audio");
 		}
 		cdrEntity.setUuid(uuid);
-		cdrEntity.setTimeLen(DateUtils.secondsBetween(cdrEntity.getStart_time(), cdrEntity.getEnd_time()));
+		cdrEntity.setTimeLen(DateUtils.secondsBetween(cdrEntity.getStart_time(), cdrEntity.getEnd_time()) * 1000);
 		cdrEntity.setExtNum(sip_auth_username);
 		if(!StringUtils.isNullOrEmpty(extNum)){
 			cdrEntity.setExtNum(extNum);
