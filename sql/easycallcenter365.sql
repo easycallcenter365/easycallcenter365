@@ -487,7 +487,7 @@ CREATE TABLE `cc_params` (
 -- Records of cc_params
 -- ----------------------------
 INSERT INTO `cc_params` VALUES ('1', '电话工具条-外呼电话的解密key', 'phone_encrypted_key', '123456', 'phone-bar', '0');
-INSERT INTO `cc_params` VALUES ('2', '录音保存路径', 'recording_path', 'C:/home/Records/', 'phone-bar', '0');
+INSERT INTO `cc_params` VALUES ('2', '录音保存路径', 'recording_path', '/home/Records/', 'phone-bar', '0');
 INSERT INTO `cc_params` VALUES ('3', '是否开启立体音', 'enable_cc_record_stereo', 'false', 'phone-bar', '0');
 INSERT INTO `cc_params` VALUES ('4', '话单推送接口', 'post_cdr_url', 'http://127.0.0.1:8880/call-center/saveCdrTest', 'phone-bar', '0');
 INSERT INTO `cc_params` VALUES ('5', '录音类型', 'recordings_extension', 'wav', 'phone-bar', '0');
