@@ -2,7 +2,7 @@
 
 
 注意：如果是采用预编译的二进制部署方式， 部署之前请把百度网盘中的 easyCallcenter365 和 FreeSWITCH 目录下的文件全部下载到本地文件夹。
-然后把他们上传到 linux 服务器目录中，优先推荐使用Debian12.5。
+然后把他们上传到 linux 服务器目录中，优先推荐使用Debian12。推荐下载地址： https://mirrors.163.com/debian-cd/current/amd64/iso-dvd/
 
 一.  Freeswitch部署
 
