@@ -1,6 +1,6 @@
 echo "The service is being launched..."
 
-echo "This will probably take 35 to 60 seconds. "
+echo "This will probably take 60 to 80 seconds. "
 
 echo "Try to start mysql-server..."
 docker start  mysql
@@ -19,6 +19,7 @@ sleep 15
 
 echo "Try to start callcenter-manager.jar"
 nohup /usr/local/jdk1.8.0_391/bin/java  -Dfile.encoding=UTF-8  -jar  easycallcenter365-gui.jar > /dev/null 2>&1 &
+sleep 15
 
 echo " "
 echo "Done."

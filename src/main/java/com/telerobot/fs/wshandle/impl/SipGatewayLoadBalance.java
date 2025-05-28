@@ -4,6 +4,7 @@ import com.telerobot.fs.entity.dto.GatewayConfig;
 import com.telerobot.fs.entity.dto.GatewayGroup;
 import com.telerobot.fs.entity.dto.GatewayConfig;
 import com.telerobot.fs.entity.dto.GatewayGroup;
+import com.telerobot.fs.utils.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,7 +98,9 @@ public class SipGatewayLoadBalance {
                     String[] tmpArray = config.getGatewayAddr().split(";");
                     config.setGatewayAddr(tmpArray[0]);
                     config.setCallProfile(tmpArray[1]);
-                } else {
+                }
+
+                if(StringUtils.isNullOrEmpty(config.getCallProfile())) {
                     config.setCallProfile(DEFAULT_CALL_PROFILE);
                 }
             }
