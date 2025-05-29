@@ -207,6 +207,8 @@
    注册成功后，拨号： 123456789
    就可以进行智能客服的呼入电话测试了。
    如果一切正常就可以听到语音播报，如果异常请查看 easycallcenter365.log 以及 FreeSWITCH 日志。
+   
+   在 /home/call-center/logs 目录下：cat easycallcenter365-ERROR.log  可以看到详细错误原因。
          
    注意：如果软电话注册超时，请在服务器端重启FreeSWITCH，30秒后再重启软电话。
    docker restart  freeswitch-debian12 

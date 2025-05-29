@@ -122,7 +122,7 @@ public abstract class MsgHandlerBase implements IMsgHandler {
 	public boolean equals(Object o) {
 		if (o == null || getClass() != o.getClass()){ return false;}
 		if(this.getSessionInfo() == null) { return  false; }
-		PollAgentStatusList that = (PollAgentStatusList) o;
+		MsgHandlerBase that = (MsgHandlerBase) o;
 		if(that.getSessionInfo() == null) { return  false; }
 		return  this.getSessionInfo().getOpNum().equalsIgnoreCase(
 				that.getSessionInfo().getOpNum())
