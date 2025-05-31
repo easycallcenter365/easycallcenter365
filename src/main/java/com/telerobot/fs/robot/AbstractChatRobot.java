@@ -84,10 +84,10 @@ public abstract class AbstractChatRobot implements IChatRobot {
         if(StringUtils.isEmpty(textParam)){
             return;
         }
-        String text = textParam.replace(" ", "")
+        String text = textParam
                 .replace("\\", "")
-                .replace("*", "")
-                .replace("\n", "");
+                .replace("*", " ")
+                .replace("\n", " ");
         String voiceSource =  SystemConfig.getValue("stream-tts-voice-source", "aliyuntts");
         String voiceCode =  SystemConfig.getValue("stream-tts-voice-name", "aixia");
 

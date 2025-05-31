@@ -402,7 +402,7 @@ public class RobotChat extends RobotBase {
                                 String.valueOf(callDetail.getRemoteVideoPort())
                         );
                         logger.info("{} stop_asr process.", uuid);
-                        chatRobot.sendTtsRequest("请稍后，现在为您转接专家坐席。");
+                        chatRobot.sendTtsRequest( SystemConfig.getValue("llm-chat-transfer-manual-tips","请稍后，现在为您转接专家坐席。"));
                         // stop_asr 的顺序很重要，需要放在播放tts之后，否则不起作用；会被uuid_break清空指令;
                         EslConnectionUtil.sendExecuteCommand("stop_asr", "", uuid);
                         acquire(5000);
@@ -415,8 +415,8 @@ public class RobotChat extends RobotBase {
                     }
 
                     if(toolRequest.getTool().equals(LlmToolRequest.HANGUP)) {
-                        chatRobot.sendTtsRequest("欢迎您再次来电咨询，祝您生活愉快，再见!");
-                        acquire(6000);
+                        chatRobot.sendTtsRequest( SystemConfig.getValue("llm-chat-transfer-hangup-tips", "欢迎您再次来电咨询，祝您生活愉快，再见!"));
+                        acquire(9000);
                         hangupAndCloseConn();
                         return;
                     }

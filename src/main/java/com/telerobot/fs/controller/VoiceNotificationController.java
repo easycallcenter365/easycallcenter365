@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/VoiceNotification")
+@RequestMapping("/api/VoiceNotification")
 public class VoiceNotificationController {
 
     private final static Logger logger = LoggerFactory.getLogger(CdrController.class);

@@ -74,7 +74,8 @@ public class LlmChat extends AbstractChatRobot {
 
             JSONObject userMessage1 = new JSONObject();
             userMessage1.put("role", "system");
-            userMessage1.put("content", "电话已经接通，请播报开场白，不超过30个字。");
+            String openingRemarks = SystemConfig.getValue("llm-chat-opening-remarks", "电话已接通。请直播开场白，不超过30字");
+            userMessage1.put("content", openingRemarks);
             llmRoundMessages.add(userMessage1);
         }else{
             JSONObject userMessage1 = new JSONObject();
@@ -149,6 +150,7 @@ public class LlmChat extends AbstractChatRobot {
 
                     if (message.containsKey("content")) {
                         String speechContent = message.getString("content");
+                        logger.info("{} speechContent: {}", getTraceId(), speechContent);
 
                         if (!recvData) {
                             recvData = true;
@@ -159,22 +161,21 @@ public class LlmChat extends AbstractChatRobot {
 
                         if (!StringUtils.isEmpty(speechContent)) {
                             //  send to tts server
-                            String tmpText = speechContent.trim().replace(" ", "").replace(" ", "");
-                            if (tmpText.startsWith("{") && !jsonFormat) {
+                            if (speechContent.startsWith("{") && !jsonFormat) {
                                 logger.info("{} json response detected.", getTraceId());
                                 jsonFormat = true;
                                 aiphoneRes.setJsonResponse(true);
                             }
 
-                            if (!StringUtils.isEmpty(tmpText) && !jsonFormat) {
-                                ttsTextCache.add(tmpText);
-                                ttsTextLength += tmpText.length();
+                            if (!StringUtils.isEmpty(speechContent) && !jsonFormat) {
+                                ttsTextCache.add(speechContent);
+                                ttsTextLength += speechContent.length();
                                 // 积攒足够的字数之后，才发送给tts，避免播放异常;
-                                if (ttsTextLength >= 10 && checkPauseFlag(tmpText)) {
+                                if (ttsTextLength >= 10 && checkPauseFlag(speechContent)) {
                                     sendToTts();
                                 }
                             }
-                            responseBuilder.append(tmpText);
+                            responseBuilder.append(speechContent);
                         }
                     }
                 }
