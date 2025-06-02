@@ -37,6 +37,11 @@ public interface IChatRobot {
     void sendTtsRequest(String text);
 
     /**
+     *  关闭tts通道
+     */
+    void closeTts();
+
+    /**
      *  标记语音合成的tts通道状态
      */
     void setTtsChannelState(boolean closed);

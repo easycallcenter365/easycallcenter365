@@ -150,6 +150,7 @@ public class MaxKB extends AbstractChatRobot {
             if(ttsTextLength > 0 && !jsonFormat){
                 sendToTts();
             }
+            closeTts();
 
             JSONObject finalResponse = new JSONObject();
             finalResponse.put("role", "assistant");

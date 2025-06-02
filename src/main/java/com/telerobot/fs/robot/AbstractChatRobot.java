@@ -102,6 +102,16 @@ public abstract class AbstractChatRobot implements IChatRobot {
         }
     }
 
+    /**
+     *  关闭tts通道
+     */
+    @Override
+    public  void closeTts(){
+        if(!ttsChannelClosed) {
+            EslConnectionUtil.sendExecuteCommand("aliyuntts_resume", "<StopSynthesis/>", uuid);
+        }
+    }
+
     @Override
     public String getDialogues(){
         return JSON.toJSONString(llmRoundMessages);

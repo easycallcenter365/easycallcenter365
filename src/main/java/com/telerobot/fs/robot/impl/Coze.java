@@ -220,6 +220,7 @@ public class Coze  extends AbstractChatRobot {
         if(ttsTextLength > 0 && !jsonFormat.get()){
             sendToTts();
         }
+        closeTts();
 
         finalResponse.put("content", answer);
         aiphoneRes.setBody(answer);
