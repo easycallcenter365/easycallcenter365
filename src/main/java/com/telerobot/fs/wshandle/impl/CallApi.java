@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class CallApi extends MsgHandlerBase {
 
-	private CallListener listener = null;
+	protected CallListener listener = null;
 
     /**
      *  转接座席超时时间

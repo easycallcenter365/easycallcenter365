@@ -143,6 +143,22 @@ public class RespStatus {
      */
     public static final int ASR_PROCESS_STARTED =  622;
 
+
+    /**
+     * customer call session hold.
+     */
+    public static final int CUSTOMER_CHANNEL_HOLD =  623;
+
+    /**
+     * customer call session unHold.
+     */
+    public static final int CUSTOMER_CHANNEL_UNHOLD =  624;
+
+    /**
+     * customer call session on hold is hangup.
+     */
+    public static final int CUSTOMER_ON_HOLD_HANGUP =  625;
+
     /**
      * 多人电话会议，重复的被叫;
      */

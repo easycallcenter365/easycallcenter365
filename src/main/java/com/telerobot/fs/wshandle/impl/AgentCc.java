@@ -34,22 +34,7 @@ public class AgentCc extends MsgHandlerBase {
         switch (cmd) {
             case "setStatus":
                 int status = callArgs.getArgs().getIntValue("status");
-                int affectRow = sysService.setAgentStatus(getSessionInfo().getOpNum(), status);
-                if(status == AgentStatus.free.getIndex()) {
-                    this.getSessionInfo().unLock();
-                }
-                if (affectRow == 1) {
-                    AgentStatus agentStatus = AgentStatus.getItemByValue(status);
-                    String description = "cant not get description";
-                    if (null != agentStatus) {
-                        description = agentStatus.toString();
-                    }
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("status", status);
-                    sendReplyToAgent(new MessageResponse(RespStatus.STATUS_CHANGED, "agent status: " + description, jsonObject));
-                } else {
-                    sendReplyToAgent(new MessageResponse(RespStatus.SERVER_ERROR, "update agent status error."));
-                }
+                setStatus(status);
                 break;
             case "disconnect":
                 MessageHandlerEngineList.getInstance().delete(getSessionInfo().getSessionId(), true);
@@ -59,4 +44,28 @@ public class AgentCc extends MsgHandlerBase {
                 break;
         }
     }
+
+    /**
+     * set agent status.
+     * @param status
+     */
+    protected void setStatus(int status){
+        int affectRow = sysService.setAgentStatus(getSessionInfo().getOpNum(), status);
+        if(status == AgentStatus.free.getIndex()) {
+            this.getSessionInfo().unLock();
+        }
+        if (affectRow == 1) {
+            AgentStatus agentStatus = AgentStatus.getItemByValue(status);
+            String description = "cant not get description";
+            if (null != agentStatus) {
+                description = agentStatus.toString();
+            }
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("status", status);
+            sendReplyToAgent(new MessageResponse(RespStatus.STATUS_CHANGED, "agent status: " + description, jsonObject));
+        } else {
+            sendReplyToAgent(new MessageResponse(RespStatus.SERVER_ERROR, "update agent status error."));
+        }
+    }
+
 }

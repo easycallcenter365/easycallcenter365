@@ -11,7 +11,7 @@
 	  
     <script type="text/javascript">
         var _phoneBar = new ccPhoneBarSocket();
-        var scriptServer = "192.168.14.218";
+        var scriptServer = "127.0.0.1";
         var  extnum = '1018'; //分机号
         var opnum = '8001'; //工号
         var skillLevel = 9; //技能等级
@@ -183,12 +183,20 @@ window.onload = function(){
         $("#reInviteVideoBtn").removeAttr("disabled");
     });
 
+    _phoneBar.on(ccPhoneBarSocket.eventList.customer_channel_hold, function (msg) {
+        console.log("客户通话已保持: " ,msg);
+        _phoneBar.updatePhoneBar(msg, ccPhoneBarSocket.eventListWithTextInfo.customer_channel_hold.code);
+    });
+
+    _phoneBar.on(ccPhoneBarSocket.eventList.customer_channel_unhold, function (msg) {
+        console.log("客户通话已接回." ,msg);
+        _phoneBar.updatePhoneBar(msg, ccPhoneBarSocket.eventListWithTextInfo.customer_channel_unhold.code);
+    });
+
     _phoneBar.on(ccPhoneBarSocket.eventList.on_video_call_connected, function(msg){
         console.log("视频通话已建立: " ,msg);
         $("#sendVideoFileBtn").removeAttr("disabled");
     });
-
-    
 
     // 订阅的坐席状态列表发生改变
     _phoneBar.on(ccPhoneBarSocket.eventList.agent_status_data_changed, function (msg) {
@@ -331,6 +339,8 @@ function onTransferToConferenceSuccess(msg) {
             <li><a href="#" id="setFree" class="xz_btn off"></a><span>置闲</span></li>
             <li><a href="#" id="setBusy" class="sm_btn off"></a><span>忙碌</span></li>
             <li><a href="#" id="callBtn" class="wh_btn"></a><span>外呼</span></li>
+            <li id="holdBtnLi"><a href="#" id="holdBtn" class="bc_btn off"></a><span>保持</span></li>
+            <li id="unHoldBtnLi"><a href="#" id="unHoldBtn" class="bc2_btn off"></a><span>接回</span></li>
             <li><a href="#" id="transferBtn" class="zjie_btn"></a><span>转接</span></li>
             <li><a href="#" id="conferenceBtn" class="hy_btn"></a><span>会议</span></li>
             <li><a href="#" id="hangUpBtn" class="gj_btn"></a><span>挂机</span></li>

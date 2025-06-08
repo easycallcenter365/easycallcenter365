@@ -16,7 +16,7 @@ public class MessageHandlerEngine   {
 		if (this.getSessionInfo() == null ||
 				!this.getSessionInfo().IsValid()) {
 			String tips = "You are not logged in or your login timed out, cant not process your request.";
-			logger.error("{} {} ", getTraceId(), tips);
+			logger.info("{} {} ", getTraceId(), tips);
 			sendReplyToAgent(new MessageResponse(RespStatus.REQUEST_PARAM_ERROR,  tips));
 			return false;
 		}
