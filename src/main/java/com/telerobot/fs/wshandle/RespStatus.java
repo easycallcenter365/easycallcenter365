@@ -159,6 +159,9 @@ public class RespStatus {
      */
     public static final int CUSTOMER_ON_HOLD_HANGUP =  625;
 
+
+    public static final int INNER_CONSULTATION_REQUEST = 626;
+
     /**
      * 多人电话会议，重复的被叫;
      */

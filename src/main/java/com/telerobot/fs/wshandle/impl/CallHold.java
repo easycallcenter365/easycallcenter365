@@ -28,7 +28,7 @@ public class CallHold extends MsgHandlerBase {
         if (callArgs == null) {
             return;
         }
-        logger.info("{} recv msg: CallApi: {}", getTraceId(), data.getBody());
+        logger.info("{} recv msg: CallHold: {}", getTraceId(), data.getBody());
         String cmd = callArgs.getCmd();
         if (cmd == null || cmd.length() == 0) {
             Utils.processArgsError("cmd param error", this);
@@ -71,11 +71,12 @@ public class CallHold extends MsgHandlerBase {
             }
 
             customerChannel = callApi.listener.getCustomerChannel();
-            if(customerChannel.getHangupTime() > 0L || customerChannel.getAnsweredTime() == 0L ){
+            if(customerChannel == null || customerChannel.getHangupTime() > 0L || customerChannel.getAnsweredTime() == 0L ){
                 sendReplyToAgent(new MessageResponse(
                         RespStatus.REQUEST_PARAM_ERROR,
                         "Call session is hangup or not ready."
                 ));
+                customerChannel = null;
                 return;
             }
 

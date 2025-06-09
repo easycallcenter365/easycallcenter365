@@ -13,7 +13,7 @@
         var _phoneBar = new ccPhoneBarSocket();
         var scriptServer = "127.0.0.1";
         var  extnum = '1018'; //分机号
-        var opnum = '8001'; //工号
+        var opnum = '1018'; //工号
         var skillLevel = 9; //技能等级
         var groupId = 1; // 业务组id
         if(window.location.href.toString().indexOf("?") != -1){
@@ -342,6 +342,7 @@ function onTransferToConferenceSuccess(msg) {
             <li id="holdBtnLi"><a href="#" id="holdBtn" class="bc_btn off"></a><span>保持</span></li>
             <li id="unHoldBtnLi"><a href="#" id="unHoldBtn" class="bc2_btn off"></a><span>接回</span></li>
             <li><a href="#" id="transferBtn" class="zjie_btn"></a><span>转接</span></li>
+            <li><a href="#" id="consultationBtn" class="zixun_btn"></a><span>咨询</span></li>
             <li><a href="#" id="conferenceBtn" class="hy_btn"></a><span>会议</span></li>
             <li><a href="#" id="hangUpBtn" class="gj_btn"></a><span>挂机</span></li>
             <li><a href="#" id="resetStatus" class="qz_btn"></a><span>强置</span></li>
@@ -403,8 +404,12 @@ function onTransferToConferenceSuccess(msg) {
                     </td>
                     <td valign="middle">
                         <input type="button" name="doTransferBtn" id="doTransferBtn"
-                               onclick="_phoneBar.transferBtnClickUI('张三')"
-                               style="width: 70px;" value="转接电话" />
+                               onclick="_phoneBar.transferBtnClickUI()"
+                               style="width: 70px;" value="转接电话" title="把当前电话转接给他/她处理。" /> &nbsp;
+                        <input type="button" name="doConsultationBtn" id="doConsultationBtn"
+                               onclick="_phoneBar.consultationBtnClickUI()"
+                               style="width: 70px;" value="拨号咨询" title="进入电话排队, 等待对方接听。" />
+
                     </td>
                 </tr>
             </table>

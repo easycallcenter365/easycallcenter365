@@ -147,7 +147,11 @@ div,select,textarea,table td,table td,table tr{font-family:myFirstFont;font-size
 .bc2_btn.on{background:url(./images/phonebar/unhold.png) no-repeat; -webkit-filter: grayscale(1%);-moz-filter: grayscale(1%);-ms-filter: grayscale(1%); -o-filter: grayscale(1%);filter: grayscale(1%);filter: gray;}
 
 .zjie_btn,.zjie_btn.on{background:url(./images/phonebar/transfer.png) no-repeat; -webkit-filter: grayscale(100%);-moz-filter: grayscale(100%);-ms-filter: grayscale(100%); -o-filter: grayscale(100%);filter: grayscale(100%);filter: gray;}/* 转接 */
-.zjie_btn.on{background:url(./images/phonebar/transfer.png) no-repeat; -webkit-filter: grayscale(1%);-moz-filter: grayscale(1%);-ms-filter: grayscale(1%); -o-filter: grayscale(1%);filter: grayscale(1%);filter: gray;}   
+.zjie_btn.on{background:url(./images/phonebar/transfer.png) no-repeat; -webkit-filter: grayscale(1%);-moz-filter: grayscale(1%);-ms-filter: grayscale(1%); -o-filter: grayscale(1%);filter: grayscale(1%);filter: gray;}
+
+.zixun_btn,.zixun_btn.on{background:url(./images/phonebar/consultation.png) no-repeat; -webkit-filter: grayscale(100%);-moz-filter: grayscale(100%);-ms-filter: grayscale(100%); -o-filter: grayscale(100%);filter: grayscale(100%);filter: gray;}/* 转接 */
+.zixun_btn.on{background:url(./images/phonebar/consultation.png) no-repeat; -webkit-filter: grayscale(1%);-moz-filter: grayscale(1%);-ms-filter: grayscale(1%); -o-filter: grayscale(1%);filter: grayscale(1%);filter: gray;}
+
 .myd_btn,.myd_btn.on{background-position:-151px -2px; }/* 满意度 */
 .myd_btn.on{ background-color:#f7ae2d; border:1px solid #f7ae2d;}
 .jt_btn,.jt_btn.on{background:url(./images/phonebar/mute.png) no-repeat; -webkit-filter: grayscale(100%);-moz-filter: grayscale(100%);-ms-filter: grayscale(100%); -o-filter: grayscale(100%);filter: grayscale(100%);filter: gray;}/* 监听 */

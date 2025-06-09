@@ -1,6 +1,7 @@
 package com.telerobot.fs.wshandle;
 
 import com.telerobot.fs.config.AppContextProvider;
+import com.telerobot.fs.config.SystemConfig;
 import com.telerobot.fs.config.UuidGenerator;
 import com.telerobot.fs.entity.po.AgentEntity;
 import com.telerobot.fs.entity.pojo.AgentStatus;
@@ -164,9 +165,13 @@ public class SessionManager {
 		return instance;
 	}
 
+	private static int transferAgentTimeOut = Integer.parseInt(
+			SystemConfig.getValue("inbound-transfer-agent-timeout", "30")
+	);
+
 	/**
 	 * 定时批量重置 cc_online_user表 座席锁定状态 busy_lock_time；
-	 * 如果座席的锁定状态超过6秒仍然没有解除，说明电话转接可能出现异常或者其他原因导致，
+	 * 如果座席的锁定状态超过 transferAgentTimeOut 仍然没有解除，说明电话转接可能出现异常或者其他原因导致，
 	 * 此时如果不解除锁定状态，会导致座席永远处于忙碌状态而无法接到电话。
 	 */
 	private void resetAgentBusyLockTime() {
@@ -176,7 +181,7 @@ public class SessionManager {
 
 		while (true) {
 
-			long timeout = System.currentTimeMillis() - 9 * 1000;
+			long timeout = System.currentTimeMillis() - (transferAgentTimeOut + 5) * 1000;
 			List<SessionEntity> sessionList =  AppContextProvider.getBean(SysService.class).
 					selectAgentBusyLockTimeout(timeout);
 

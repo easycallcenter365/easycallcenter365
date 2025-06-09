@@ -741,6 +741,36 @@ function ccPhoneBarSocket() {
 		ws.send(JSON.stringify(cmdInfo));
 	};
 
+
+	this.consultationBtnClickUI = function () {
+		var groupId = $("#transfer_to_groupIds").val();
+		if($.trim(groupId) == ""){
+			alert("请选择业务组!");
+			$("#transfer_to_groupIds").focus();
+			return;
+		}
+		var member = $("#transfer_to_member").val();
+		if($.trim(member) == ""){
+			alert("请选择要咨询的坐席成员!");
+			$("#transfer_to_member").focus();
+			return;
+		}
+
+		var selectText = $('#transfer_to_member option:selected').text();
+		if(selectText.indexOf("空闲") == -1){
+			alert("请选择空闲的坐席成员!");
+			$("#transfer_to_member").focus();
+			return;
+		}
+
+		if(member == this.getOpNum()) {
+			alert("不能咨询自己，请选择其他坐席成员!");
+			return;
+		}
+
+		this.callControl("consultation", {"to": member});
+	};
+
 	/**
 	 *  处理通话转接按钮点击事件
 	 */
@@ -925,7 +955,7 @@ function ccPhoneBarSocket() {
 	  ccPhoneBarSocket.eventListWithTextInfo = {
 		"ws_connected": { "code": 200,  msg:"已签入",
 			btn_text:[{id:"#onLineBtn",name:"签出"}],
-			enabled_btn:['#setFree','#callBtn','#onLineBtn']
+			enabled_btn:['#setFree','#callBtn','#onLineBtn', '#consultationBtn']
 		},
 		"ws_disconnected": { "code" : 202, msg:"服务器连接断开",
 			btn_text:[{id:"#onLineBtn",name:"签入"}],
@@ -945,35 +975,35 @@ function ccPhoneBarSocket() {
 		},
 		"caller_answered":{ "code" : 600, msg:"分机已接通",
 			btn_text:[],
-			enabled_btn:['#resetStatus', '#hangUpBtn', '#transferBtn', '#holdBtn']
+			enabled_btn:['#resetStatus', '#hangUpBtn', '#transferBtn', '#holdBtn', '#consultationBtn']
 		},
 		"caller_hangup":{ "code" : 601, msg:"分机已挂断",
 			btn_text:[],
-			enabled_btn:['#onLineBtn', '#resetStatus', '#callBtn', '#setFree' ]
+			enabled_btn:['#onLineBtn', '#resetStatus', '#callBtn', '#setFree', '#consultationBtn' ]
 		},
 		"caller_busy":{ "code" : 602, msg:"分机忙,上一通电话未挂断",
 			btn_text:[],
-			enabled_btn:['#onLineBtn', '#resetStatus', '#callBtn', '#setFree']
+			enabled_btn:['#onLineBtn', '#resetStatus', '#callBtn', '#setFree', '#consultationBtn']
 		},
 		"caller_not_login":{ "code" : 603, msg:"分机未登录，请检查",
 			btn_text:[],
-			enabled_btn:['#onLineBtn', '#resetStatus', '#callBtn', '#setFree']
+			enabled_btn:['#onLineBtn', '#resetStatus', '#callBtn', '#setFree', '#consultationBtn']
 		},
 		"caller_respond_timeout":{ "code" : 604, msg:"分机未应答超时，请重新打开分机",
 			btn_text:[],
-			enabled_btn:['#onLineBtn', '#resetStatus', '#callBtn', '#setFree']
+			enabled_btn:['#onLineBtn', '#resetStatus', '#callBtn', '#setFree', '#consultationBtn']
 		},
 		"callee_answered":{ "code" : 605, msg:"被叫已接通",
 			btn_text:[],
-			enabled_btn:['#resetStatus', '#hangUpBtn', '#transferBtn', '#holdBtn' ]
+			enabled_btn:['#resetStatus', '#hangUpBtn', '#transferBtn', '#holdBtn', '#consultationBtn' ]
 		},
 		"callee_hangup":{ "code" : 606, msg:"通话结束",
 			btn_text:[],
-			enabled_btn:['#onLineBtn', '#resetStatus', '#callBtn', '#setFree' ]
+			enabled_btn:['#onLineBtn', '#resetStatus', '#callBtn', '#setFree' , '#consultationBtn']
 		},
 		"callee_ringing":{ "code" : 607, msg:"被叫振铃中",
 			btn_text:[],
-			enabled_btn:['#resetStatus', '#hangUpBtn', '#transferBtn']
+			enabled_btn:['#resetStatus', '#hangUpBtn', '#transferBtn', '#consultationBtn']
 		},
 		"status_changed":{ "code" : 608, msg:"状态已改变",
 			btn_text:[],
@@ -981,15 +1011,15 @@ function ccPhoneBarSocket() {
 		},
 		"free":{ "code" : 0, msg:"空闲中",
 			btn_text:[],
-			enabled_btn:['#setBusy','#onLineBtn']
+			enabled_btn:['#setBusy','#onLineBtn', '#consultationBtn']
 		},
 		"busy":{ "code" : 1, msg:"忙碌",
 			btn_text:[],
-			enabled_btn:['#setFree', '#onLineBtn',  '#callBtn']  //  '#transferBtn'
+			enabled_btn:['#setFree', '#onLineBtn',  '#callBtn', '#consultationBtn']  //  '#transferBtn'
 		},
 		"customer_channel_hold" : { "code" : 623, msg:"通话已保持.",
 			btn_text:[],
-			enabled_btn:['#setFree',  '#callBtn', '#unHoldBtn' ]
+			enabled_btn:['#setFree',  '#callBtn', '#unHoldBtn', '#consultationBtn' ]
 		},
 	   "customer_channel_unhold" : { "code" : 624, msg:"通话已接回.",
 			  btn_text:[],
@@ -997,7 +1027,7 @@ function ccPhoneBarSocket() {
 		}
 	};
 
-	ccPhoneBarSocket.phone_buttons = ['#setFree', '#setBusy', '#callBtn','#hangUpBtn' , '#resetStatus' ,'#onLineBtn', '#transferBtn', '#holdBtn', '#unHoldBtn'];
+	ccPhoneBarSocket.phone_buttons = ['#setFree', '#setBusy', '#callBtn','#hangUpBtn' , '#resetStatus' ,'#onLineBtn', '#transferBtn', '#holdBtn', '#unHoldBtn', '#consultationBtn'];
 
 	// 更新状态显示
 	this.updatePhoneBar = function (msg, status_key) {
@@ -1120,6 +1150,7 @@ function ccPhoneBarSocket() {
 			}
 		});
 
+		$("#doTransferBtn").hide();
 		$('#transferBtn').on('click', function () {
 			if ($(this).hasClass('on')) {
 				if(!_cc.getIsConnected()){
@@ -1130,15 +1161,36 @@ function ccPhoneBarSocket() {
 				if(transferArea.style.display === "block"){
 					transferArea.style.display = "none";
 					_phoneBar.unSubscribeAgentList();
+					$("#doTransferBtn").hide();
 				}else{
 					transferArea.style.display = "block";
 					populateGroupIdOptions();
 					_phoneBar.subscribeAgentList();
+					$("#doTransferBtn").show();
 				}
 			}
 		});
 
-
+		$("#doConsultationBtn").hide();
+		$('#consultationBtn').on('click', function () {
+			if ($(this).hasClass('on')) {
+				if(!_cc.getIsConnected()){
+					console.log('请先上线.');
+					return;
+				}
+				var transferArea = document.getElementById("transfer_area");
+				if(transferArea.style.display === "block"){
+					transferArea.style.display = "none";
+					_phoneBar.unSubscribeAgentList();
+					$("#doConsultationBtn").hide();
+				}else{
+					transferArea.style.display = "block";
+					populateGroupIdOptions();
+					_phoneBar.subscribeAgentList();
+					$("#doConsultationBtn").show();
+				}
+			}
+		});
 
 		$('#onLineBtn').on('click', function () {
 			if ($(this).hasClass('on')) {

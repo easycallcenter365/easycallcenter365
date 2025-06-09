@@ -83,6 +83,9 @@ public class CallApi extends MsgHandlerBase {
             case "transferCall":
                 transferCall(callArgs);
                 break;
+            case "consultation":
+                consultation(callArgs);
+                break;
             case "reInviteVideo":
                 reInviteVideo();
                 break;
@@ -97,7 +100,105 @@ public class CallApi extends MsgHandlerBase {
 		}
 	}
 
+    /**
+     * The internal consultation function of the call center is a common one:
+     * novices consult experienced employees.
+     */
+    private void consultation(CallArgs callArgs) {
+        String from = this.getSessionInfo().getOpNum();
+        String to = callArgs.getArgs().getString("to");
+        if(from.equalsIgnoreCase(to)){
+            sendReplyToAgent(new MessageResponse(
+                    RespStatus.REQUEST_PARAM_ERROR,
+                    "can not consultation yourself."
+            ));
+            return;
+        }
+        if(StringUtils.isNullOrEmpty(to)){
+            sendReplyToAgent(new MessageResponse(
+                    RespStatus.REQUEST_PARAM_ERROR,
+                    "'to' argument is null in consultation."
+            ));
+            return;
+        }
+        MessageHandlerEngine engine = MessageHandlerEngineList.getInstance().getMsgHandlerEngineByOpNum(to);
+        if (null != engine) {
 
+            String uuidInner = UuidGenerator.GetOneUuid();
+            String uuidOuter = UuidGenerator.GetOneUuid();
+
+            SwitchChannel customerChannel = new SwitchChannel(uuidOuter, uuidInner, PhoneCallType.AUDIO_CALL, CallDirection.INBOUND);
+            SwitchChannel agentChannel = new SwitchChannel(uuidInner, uuidOuter, PhoneCallType.AUDIO_CALL, CallDirection.INBOUND);
+
+            customerChannel.setPhoneNumber(engine.getSessionInfo().getExtNum());
+            customerChannel.setBridgeCallAfterPark(true);
+            customerChannel.setSendChannelStatusToWsClient(true);
+            agentChannel.setPhoneNumber(getExtNum());
+            agentChannel.setBridgeCallAfterPark(false);
+            agentChannel.setSendChannelStatusToWsClient(true);
+
+            this.connectExtension(agentChannel, customerChannel);
+            EslConnectionPool connectionPool = EslConnectionUtil.getDefaultEslConnectionPool();
+            connectionPool.getDefaultEslConn().addListener(agentChannel.getUuid() , listener);
+            connectionPool.getDefaultEslConn().addListener(customerChannel.getUuid() , listener);
+
+            if(agentChannel.getAnsweredTime() > 0) {
+
+                if (engine.getSessionInfo() == null || !engine.getSessionInfo().tryLock()) {
+                    sendReplyToAgent(new MessageResponse(
+                            RespStatus.LOCK_AGENT_FAIL,
+                            "lock agent failed."
+                    ));
+                    return;
+                }
+
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("status", AgentStatus.busy.getIndex());
+                // 座席置忙
+                engine.sendReplyToAgent(new MessageResponse(
+                        RespStatus.STATUS_CHANGED, "当前用户状态: 忙碌", jsonObject)
+                );
+                //发送弹屏消息
+                engine.sendReplyToAgent(new MessageResponse(
+                        RespStatus.INNER_CONSULTATION_REQUEST, "内部业务咨询请求，来自:" + from)
+                );
+
+                logger.info("{} 设定座席的忙碌锁定状态. userId={}, extNum={}",
+                        getTraceId(),
+                        to,
+                        engine.getSessionInfo().getExtNum()
+                );
+                AppContextProvider.getBean(SysService.class).setAgentStatusWithBusyLock(
+                        to, AgentStatus.busy.getIndex()
+                );
+
+                CallApi callApi = ((CallApi) engine.getMessageHandleByName("call"));
+                if (null == callApi) {
+                    sendReplyToAgent(new MessageResponse(
+                            RespStatus.SERVER_ERROR,
+                            "Cant not get CallApi."
+                    ));
+                    return;
+                }
+
+                customerChannel.setAnsweredHook(new IOnAnsweredHook() {
+                    @Override
+                    public void onAnswered(Map<String, String> eventHeaders, String traceId) {
+                        AppContextProvider.getBean(SysService.class).resetAgentBusyLockTime(to);
+                        logger.info("{} The person being consulted has been answered.", callApi.getTraceId());
+                    }
+                });
+
+                customerChannel.setAnsweredTime(0L);
+                callApi.connectExtension(customerChannel, agentChannel);
+            }
+        }else {
+            sendReplyToAgent(new MessageResponse(
+                    RespStatus.REQUEST_PARAM_ERROR,
+                    String.format("user %s is offline.", to)
+            ));
+        }
+    }
 
 	private void playMp4File(CallArgs callArgs){
 	    String filePath = callArgs.getArgs().getString("mp4FilePath");
@@ -132,6 +233,12 @@ public class CallApi extends MsgHandlerBase {
         agentChannel.setBridgeCallAfterPark(true);
         agentChannel.setFlag(ChannelFlag.TRANSFER_CALL_RECV);
         agentChannel.setSendChannelStatusToWsClient(true);
+        agentChannel.setAnsweredHook(new IOnAnsweredHook() {
+            @Override
+            public void onAnswered(Map<String, String> eventHeaders, String traceId) {
+                AppContextProvider.getBean(SysService.class).resetAgentBusyLockTime(fromOpNum);
+            }
+        });
 
         this.connectExtension(agentChannel, customerChannel);
 
