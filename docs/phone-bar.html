@@ -185,12 +185,12 @@ window.onload = function(){
 
     _phoneBar.on(ccPhoneBarSocket.eventList.customer_channel_hold, function (msg) {
         console.log("客户通话已保持: " ,msg);
-        _phoneBar.updatePhoneBar(msg, ccPhoneBarSocket.eventListWithTextInfo.customer_channel_hold.code);
+        $("#callStatus").text("通话已保持");
     });
 
     _phoneBar.on(ccPhoneBarSocket.eventList.customer_channel_unhold, function (msg) {
         console.log("客户通话已接回." ,msg);
-        _phoneBar.updatePhoneBar(msg, ccPhoneBarSocket.eventListWithTextInfo.customer_channel_unhold.code);
+        $("#callStatus").text("客户通话已接回");
     });
 
     _phoneBar.on(ccPhoneBarSocket.eventList.on_video_call_connected, function(msg){

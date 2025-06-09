@@ -393,11 +393,20 @@ function ccPhoneBarSocket() {
 					if (parseInt(resp_status) === parseInt(ccPhoneBarSocket.eventList.customer_channel_hold)) {
 						$("#holdBtnLi").hide();
 						$("#unHoldBtnLi").show();
+						$("#unHoldBtn").addClass('on');
 					}
 
 					if (parseInt(resp_status) === parseInt(ccPhoneBarSocket.eventList.customer_channel_unhold)) {
 						$("#holdBtnLi").show();
+						$("#holdBtn").addClass('on');
 						$("#unHoldBtnLi").hide();
+					}
+
+					if (parseInt(resp_status) === parseInt(ccPhoneBarSocket.eventList.customer_on_hold_hangup)) {
+						$("#holdBtnLi").show();
+						$("#holdBtn").removeClass('on');
+						$("#unHoldBtnLi").hide();
+						$("#callStatus").text("保持的通话已挂机.");
 					}
 
 					if (parseInt(resp_status) === parseInt(ccPhoneBarSocket.eventList.agent_status_data_changed)) {
@@ -597,6 +606,8 @@ function ccPhoneBarSocket() {
 		"customer_channel_hold" : 623,
 
 		"customer_channel_unhold" : 624,
+
+		"customer_on_hold_hangup" : 625,
 
 	    /**
 		* 多人电话会议，重复的被叫 ,

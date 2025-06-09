@@ -11,7 +11,7 @@ import link.thingscloud.freeswitch.esl.EslConnectionUtil;
 import java.util.Map;
 
 public class CallHold extends MsgHandlerBase {
-    SwitchChannel customerChannel = null;
+   private volatile   SwitchChannel customerChannel = null;
 
     @Override
     public void processTask(MsgStruct data) {
@@ -94,11 +94,6 @@ public class CallHold extends MsgHandlerBase {
             callApi.listener.endCall("call_hold.");
             ThreadUtil.sleep(10);
 
-            //send ws msg.
-            engine.sendReplyToAgent(new MessageResponse(
-                    RespStatus.CUSTOMER_CHANNEL_HOLD, "customer call session hold.", customerChannel)
-            );
-
             EslConnectionUtil.sendExecuteCommand("endless_playback",
                     "$${sounds_dir}/ivr/hold.wav",
                     customerChannel.getUuid()
@@ -107,16 +102,36 @@ public class CallHold extends MsgHandlerBase {
             customerChannel.setHangupHook(new IOnHangupHook() {
                 @Override
                 public void onHangup(Map<String, String> eventHeaders, String traceId) {
+                    String tips = "customer call on hold is hangup.";
                     engine.sendReplyToAgent(new MessageResponse(
-                            RespStatus.CUSTOMER_ON_HOLD_HANGUP, "customer call on hold is hangup.", customerChannel)
+                            RespStatus.CUSTOMER_ON_HOLD_HANGUP, tips, customerChannel)
                     );
+                    logger.info(tips);
+                    clearHoldCallFlag();
                     customerChannel = null;
                 }
             });
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    sendWsMsg();
+                }
+            }).start();
         } else {
             engine.sendReplyToAgent(new MessageResponse(
                     RespStatus.SERVER_ERROR, "server internal error!")
             );
+        }
+    }
+
+    private void sendWsMsg(){
+        while(null != customerChannel){
+            //send ws msg.
+            sendReplyToAgent(new MessageResponse(
+                    RespStatus.CUSTOMER_CHANNEL_HOLD, "customer call session hold.", customerChannel)
+            );
+            ThreadUtil.sleep(2000);
         }
     }
 
@@ -147,6 +162,7 @@ public class CallHold extends MsgHandlerBase {
         agentChannel.setAnsweredTime(0L);
         agentChannel.setHangupTime(0L);
         agentChannel.setBridgeCallAfterPark(true);
+        agentChannel.setSendChannelStatusToWsClient(true);
         agentChannel.setAnsweredHook(new IOnAnsweredHook() {
             @Override
             public void onAnswered(Map<String, String> eventHeaders, String traceId) {
@@ -154,18 +170,33 @@ public class CallHold extends MsgHandlerBase {
                 sendReplyToAgent(new MessageResponse(
                         RespStatus.CUSTOMER_CHANNEL_UNHOLD, "customer call session unhold.", customerChannel)
                 );
+                clearHoldCallFlag();
                 customerChannel = null;
             }
         });
+        customerChannel.setSendChannelStatusToWsClient(true);
         customerChannel.setHangupHook(new IOnHangupHook() {
             @Override
             public void onHangup(Map<String, String> eventHeaders, String traceId) {
+                clearHoldCallFlag();
                 customerChannel = null;
             }
         });
-        customerChannel.clearFlag(ChannelFlag.HOLD_CALL);
+        setHoldCallFlag();
         customerChannel.setUuidBLeg(bleg);
         callApi.connectExtension(agentChannel, customerChannel);
+    }
+
+    private void setHoldCallFlag(){
+        if( customerChannel != null){
+            customerChannel.setFlag(ChannelFlag.HOLD_CALL);
+        }
+    }
+
+    private void clearHoldCallFlag(){
+        if( customerChannel != null){
+            customerChannel.clearFlag(ChannelFlag.HOLD_CALL);
+        }
     }
 
 }
