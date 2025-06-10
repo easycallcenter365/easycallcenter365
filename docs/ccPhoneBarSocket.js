@@ -1162,11 +1162,13 @@ function ccPhoneBarSocket() {
 					transferArea.style.display = "none";
 					_phoneBar.unSubscribeAgentList();
 					$("#doTransferBtn").hide();
+					$("#doConsultationBtn").hide();
 				}else{
 					transferArea.style.display = "block";
 					populateGroupIdOptions();
 					_phoneBar.subscribeAgentList();
 					$("#doTransferBtn").show();
+					$("#doConsultationBtn").hide();
 				}
 			}
 		});
@@ -1183,11 +1185,13 @@ function ccPhoneBarSocket() {
 					transferArea.style.display = "none";
 					_phoneBar.unSubscribeAgentList();
 					$("#doConsultationBtn").hide();
+					$("#doTransferBtn").hide();
 				}else{
 					transferArea.style.display = "block";
 					populateGroupIdOptions();
 					_phoneBar.subscribeAgentList();
 					$("#doConsultationBtn").show();
+					$("#doTransferBtn").hide();
 				}
 			}
 		});

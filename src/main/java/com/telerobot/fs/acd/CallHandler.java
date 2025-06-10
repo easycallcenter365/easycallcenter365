@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.telerobot.fs.config.AppContextProvider;
 import com.telerobot.fs.config.SystemConfig;
 import com.telerobot.fs.entity.bo.ChanneState;
+import com.telerobot.fs.entity.bo.ChannelFlag;
 import com.telerobot.fs.entity.bo.InboundDetail;
 import com.telerobot.fs.entity.dto.CallMonitorInfo;
 import com.telerobot.fs.entity.po.CdrDetail;
@@ -395,6 +396,7 @@ public class CallHandler {
 						SwitchChannel customerChannel = new SwitchChannel(uuid, bleg, callType, CallDirection.INBOUND);
 						customerChannel.setPhoneNumber(inboundDetail.getCaller());
 						customerChannel.setChannelState(ChanneState.BRIDGED);
+						customerChannel.setFlag(ChannelFlag.HOLD_CALL);
 
 						String asyncJobId = callApi.connectAgentExtNum(agentChannel, customerChannel,
 								displayNumber, transferAgentTimeOut, inboundDetail.getInboundTime());
