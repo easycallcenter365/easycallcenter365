@@ -52,7 +52,16 @@
 下载到本地后，按照目录中的"使用说明.txt" 导入VmWare虚拟机并启动，最后调整相关参数即可体验测试。
 该部署方案可以省去从源代码编译的繁琐步骤，适合用户快速体验产品特性。
 
-### 二进制安装包
+### 一键安装脚本
+
+该安装方案适合空白主机的安装及初始化。 下载地址： https://pan.baidu.com/s/19MyZXg5HagRgDtiSVKQ3Ow 提取码: rgde 。
+安装包下载到服务器目录后，执行以下指令即可自动安装，整个过程会自动安装docker及mysql等。
+
+```bash
+chmod +x ./install.sh  && ./install.sh
+```
+
+### 手动安装包
 
 我们提供了预编译的二进制文件。 下载地址: https://pan.baidu.com/s/1xFgMPCu0VKHKnG69QhyTlA 提取码: etv5
 部署文档参考目录下的文件 "部署文档.txt"。 该部署方案可以省去从源代码编译的繁琐步骤。
