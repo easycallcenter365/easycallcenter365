@@ -108,7 +108,7 @@ public class GeminiChat extends AbstractChatRobot {
     private  JSONObject sendStreamingRequest(LlmAiphoneRes aiphoneRes, List<JSONObject> messages) throws IOException {
 
 //        curl "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent" \
-//        -H "x-goog-api-key: AIzaSyAcwos-MAuH9f4wlRm9eAHX-NnJzdOwtQ8" \
+//        -H "x-goog-api-key: your-api-key" \
 //        -H 'Content-Type: application/json' \
 //        -X POST \
 //        -d '{
