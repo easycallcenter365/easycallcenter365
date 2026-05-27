@@ -12,17 +12,17 @@ The commercial edition provides users with access to the source code, making it 
 
 ## Feature List 
 
-Supports integration with LLM platforms, such as Dify, ChatGPT, Claude, OpenRouter, DeepSeek, and more.
-Supports interruption while the AI customer service bot is speaking.
-Provides a web-based management system.
-Supports real-time streaming text-to-speech, including Deepgram and Amazon AWS speech synthesis and speech recognition.
-Supports seamless transfer from AI calls to human agents, with ACD call queueing support.
-Supports a phone toolbar.
-Supports visual IVR configuration.
-Supports creating AI voice outbound campaigns.
-Stress testing: The commercial edition supports 200 concurrent outbound or inbound calls.
-Supports multi-party calls and conference calls.
-Provides support for LLM knowledge bases.
+* Supports integration with LLM platforms, such as Dify, ChatGPT, Claude, OpenRouter, DeepSeek, and more.
+* Supports interruption while the AI customer service bot is speaking.
+* Provides a web-based management system.
+* Supports real-time streaming text-to-speech, including Deepgram and Amazon AWS speech synthesis and speech recognition.
+* Supports seamless transfer from AI calls to human agents, with ACD call queueing support.
+* Supports a phone toolbar.
+* Supports visual IVR configuration.
+* Supports creating AI voice outbound campaigns.
+* Stress testing: The commercial edition supports 200 concurrent outbound or inbound calls.
+* Supports multi-party calls and conference calls.
+* Provides support for LLM knowledge bases.
 
 Updated on: 2026/05/25
 
