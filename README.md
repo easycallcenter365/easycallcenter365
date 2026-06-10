@@ -46,7 +46,7 @@ If you encounter any issues during the trial, you can contact our pre-sales supp
 We welcome your inquiries and look forward to discussing your needs.
 WhatsApp: +1 326 467 0047
 
-![Contact us](/docs/en-US/WhatsApp.png) 
+![Contact us](/docs/en-US/WhatsApp.png)   ![联系方式](/docs/images/wechat2.png) 
 
 ## System Screenshots
 
